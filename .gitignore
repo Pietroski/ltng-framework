@@ -1,6 +1,5 @@
 # IDE configs
 .idea
-.code
 
 # build files
 /dist
