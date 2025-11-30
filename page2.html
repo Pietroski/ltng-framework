@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ltng-framework Page 2</title>
     <script src="ltng-framework.js"></script>
+    <script src="theme.js"></script>
     <style>
         body {
             font-family: sans-serif;
@@ -23,18 +24,8 @@
 <body>
     <script>
         // Initialize the SAME store with the SAME persist key
-        const themeStore = createStore({ dark: false }, { persist: 'ltng_theme' });
-
-        // Subscribe to apply the theme immediately
-        themeStore.subscribe(state => {
-            if (state.dark) {
-                document.body.style.backgroundColor = '#333';
-                document.body.style.color = '#fff';
-            } else {
-                document.body.style.backgroundColor = '#fff';
-                document.body.style.color = '#000';
-            }
-        });
+        const themeStore = createStore({}, { persist: 'ltng_theme' });
+        themeStore.subscribe(setTheme);
 
         document.body.appendChild(
             Div({ class: 'container' },
