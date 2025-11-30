@@ -1,0 +1,47 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run Current File",
+      "program": "${file}",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Verify All",
+      "program": "${workspaceFolder}/pkg/verify.test.js",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Verify Random",
+      "program": "${workspaceFolder}/pkg/random/verify.test.js",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Verify Tools",
+      "program": "${workspaceFolder}/pkg/tools/verify.test.js",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Verify Internationalisation",
+      "program": "${workspaceFolder}/pkg/internationalisation/verify.test.js",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Verify Transport",
+      "program": "${workspaceFolder}/pkg/transport/verify.test.js",
+      "console": "integratedTerminal"
+    }
+  ]
+}
