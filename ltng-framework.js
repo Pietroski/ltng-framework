@@ -35,6 +35,46 @@ function generateUUIDv7() {
     }).join('');
 }
 
+// Expose generateUUIDv7 as well if needed, or keep it internal/global
+window.generateUUIDv7 = generateUUIDv7;
+
+// Global Body Alias and Render Method
+Object.defineProperty(window, 'Body', {
+    get: () => document.body
+});
+
+// Global TextNode Alias
+window.TextNode = (text) => document.createTextNode(text);
+
+HTMLBodyElement.prototype.render = function (...children) {
+    render(this, ...children)
+};
+
+HTMLElement.prototype.render = function (...children) {
+    render(this, ...children)
+}
+
+HTMLUnknownElement.prototype.render = function (...children) {
+    render(this, ...children)
+}
+
+function render(parent, ...children) {
+    children.forEach(child => {
+        if (typeof child === 'string' || typeof child === 'number') {
+            parent.appendChild(TextNode(child))
+        } else if (child instanceof Node) {
+            parent.appendChild(child)
+        } else if (Array.isArray(child)) {
+            child.forEach(c => render(parent, c)) // child.forEach(appendChild) old and wrong
+        } else if (child === null || child === undefined) {
+            // Skip
+        } else {
+            // Try to stringify unknown objects
+            parent.appendChild(dTextNode(String(child)))
+        }
+    });
+}
+
 // Core Element Creator
 function createElement(tag, props, ...children) {
     const element = document.createElement(tag);
@@ -60,7 +100,9 @@ function createElement(tag, props, ...children) {
         element.setAttribute('id', generateUUIDv7());
     }
 
-    children.forEach((child) => render(element, child));
+    // it can now be simplified with prototype render call
+    // children.forEach((child) => render(element, child));
+    element.render(children)
 
     return element;
 }
@@ -79,12 +121,10 @@ tags.forEach(tagName => {
     };
 });
 
-// Expose generateUUIDv7 as well if needed, or keep it internal/global
-window.generateUUIDv7 = generateUUIDv7;
-
 // Simple Modal Component
-window.overlayModal = (content) => {
+window.overlayModal = (props, content) => {
     const overlay = Div({
+        ...props,
         style: 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;'
     },
         Div({
@@ -103,7 +143,8 @@ window.overlayModal = (content) => {
             )
         )
     );
-    document.body.appendChild(overlay);
+
+    Body.render(overlay);
 };
 
 // State Management
@@ -144,29 +185,3 @@ window.createStore = (initialState, options = {}) => {
 
     return { getState, setState, subscribe };
 };
-
-// Global Body Alias and Render Method
-Object.defineProperty(window, 'Body', {
-    get: () => document.body
-});
-
-HTMLBodyElement.prototype.render = function (...children) {
-    render(this, ...children)
-};
-
-function render(parent, ...children) {
-    children.forEach(child => {
-        if (typeof child === 'string' || typeof child === 'number') {
-            parent.appendChild(document.createTextNode(child));
-        } else if (child instanceof Node) {
-            parent.appendChild(child);
-        } else if (Array.isArray(child)) {
-            child.forEach(appendChild);
-        } else if (child === null || child === undefined) {
-            // Skip
-        } else {
-            // Try to stringify unknown objects
-            parent.appendChild(document.createTextNode(String(child)));
-        }
-    });
-}
