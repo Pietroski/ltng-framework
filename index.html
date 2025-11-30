@@ -66,6 +66,54 @@
                 )
             )
         );
+
+        // --- State Management Demo ---
+
+        // 1. Counter Store
+        const counterStore = createStore({ count: 0 });
+
+        const counterDisplay = Span({ style: 'font-weight: bold; margin: 0 10px;' }, '0');
+
+        counterStore.subscribe(state => {
+            counterDisplay.textContent = state.count;
+        });
+
+        const counterSection = Div({ class: 'container', style: 'margin-top: 20px;' },
+            H3({}, 'State Management: Counter'),
+            Div({},
+                Button({ onClick: () => counterStore.setState({ count: counterStore.getState().count - 1 }) }, '-'),
+                counterDisplay,
+                Button({ onClick: () => counterStore.setState({ count: counterStore.getState().count + 1 }) }, '+')
+            )
+        );
+        document.body.appendChild(counterSection);
+
+        // 2. Persisted Theme Store
+        const themeStore = createStore({ dark: false }, { persist: 'ltng_theme' });
+
+        const themeBtn = Button({ style: 'margin-top: 10px;' }, 'Toggle Theme');
+
+        themeStore.subscribe(state => {
+            if (state.dark) {
+                document.body.style.backgroundColor = '#333';
+                document.body.style.color = '#fff';
+                themeBtn.textContent = 'Switch to Light Mode';
+            } else {
+                document.body.style.backgroundColor = '#fff';
+                document.body.style.color = '#000';
+                themeBtn.textContent = 'Switch to Dark Mode';
+            }
+        });
+
+        const themeSection = Div({ class: 'container', style: 'margin-top: 20px;' },
+            H3({}, 'Persistence: Theme'),
+            P({}, 'Reload the page to see the theme persist!'),
+            themeBtn
+        );
+
+        themeBtn.onclick = () => themeStore.setState({ dark: !themeStore.getState().dark });
+
+        document.body.appendChild(themeSection);
     </script>
 </body>
 

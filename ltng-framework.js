@@ -131,3 +131,42 @@ window.overlayModal = (content) => {
     );
     document.body.appendChild(overlay);
 };
+
+// State Management
+window.createStore = (initialState, options = {}) => {
+    let state = initialState;
+    const listeners = new Set();
+    const persistKey = options.persist;
+
+    // Load from localStorage if persist option is set
+    if (persistKey) {
+        const saved = localStorage.getItem(persistKey);
+        if (saved) {
+            try {
+                state = { ...state, ...JSON.parse(saved) };
+            } catch (e) {
+                console.error('Failed to parse saved state', e);
+            }
+        }
+    }
+
+    const getState = () => state;
+
+    const setState = (partialState) => {
+        state = { ...state, ...partialState };
+        if (persistKey) {
+            localStorage.setItem(persistKey, JSON.stringify(state));
+        }
+        listeners.forEach(listener => listener(state));
+    };
+
+    const subscribe = (listener) => {
+        listeners.add(listener);
+        // Call listener immediately with current state
+        listener(state);
+        // Return unsubscribe function
+        return () => listeners.delete(listener);
+    };
+
+    return { getState, setState, subscribe };
+};
