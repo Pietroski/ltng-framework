@@ -1,3 +1,9 @@
 # build files
 /dist
 /dst
+
+# MacOS folders
+.DS_Store
+
+# Target for deprecation
+to_deprecate

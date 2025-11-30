@@ -28,6 +28,8 @@ async function run() {
 
   for (const test of tests) {
     if (filterRegex && !filterRegex.test(test.name)) {
+      console.log(color(`    [SKIP] ${test.name}: Filtered out`, "yellow"))
+      skipped++
       continue
     }
 
