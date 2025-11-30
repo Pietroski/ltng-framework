@@ -1,0 +1,8 @@
+# IDE configs
+.idea
+.vscode
+.code
+
+# build files
+/dist
+/dst

@@ -44,9 +44,23 @@ Object.defineProperty(window, 'Body', {
 });
 
 // Global TextNode Alias
-window.TextNode = (text) => document.createTextNode(text);
+window.TextNode = (text) => document.createTextNode(text)
+
+// Internal hydration flag
+let isHydrated = false;
 
 HTMLBodyElement.prototype.render = function (...children) {
+    // Auto-hydration: Clear the body on the very first render call.
+    // This ensures that:
+    // 1. On Server: We start with an empty body, render content.
+    // 2. On Client: We clear the SSR content (nuke) and re-render with interactivity (pave).
+    if (!isHydrated) {
+        while (this.firstChild) {
+            this.removeChild(this.firstChild);
+        }
+        isHydrated = true;
+    }
+
     render(this, ...children)
 };
 
