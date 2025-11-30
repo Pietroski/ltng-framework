@@ -1,4 +1,4 @@
-const { lowerCamelCaseToLowerCaseLowerKebabCase } = require('../strings/strings')
+const { lowerCamelCaseToLowerCaseLowerKebabCase } = require('..')
 
 const objStrDasher = (obj) =>
   Object.entries(obj || {}).reduce(

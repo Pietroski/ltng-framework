@@ -1,4 +1,4 @@
-const { kebabToLowerSnakeCase } = require('../tools/strings/strings');
+const { kebabToLowerSnakeCase } = require('../tools');
 
 function MakeDictionaries(dictionaries, defaultLocale) {
   let state = {
