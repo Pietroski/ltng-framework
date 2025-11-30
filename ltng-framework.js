@@ -70,7 +70,7 @@ function render(parent, ...children) {
             // Skip
         } else {
             // Try to stringify unknown objects
-            parent.appendChild(dTextNode(String(child)))
+            parent.appendChild(TextNode(String(child)))
         }
     });
 }
