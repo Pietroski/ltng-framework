@@ -5,13 +5,13 @@ let currentSuite = ""
 
 function Group(name, fn) {
   const previousSuite = currentSuite
-  currentSuite = name
+  currentSuite = `${previousSuite}[${name}] `
   fn()
   currentSuite = previousSuite
 }
 
 function Test(name, fn) {
-  const testName = currentSuite ? `[${currentSuite}] ${name}` : name
+  const testName = `${currentSuite}${name}`
   tests.push({ name: testName, fn })
 }
 
