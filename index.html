@@ -42,7 +42,7 @@
 
 <body>
     <script>
-        document.body.appendChild(
+        Body.render(
             Div({ class: 'container' },
                 Header({ class: 'header' },
                     H1({}, 'Welcome to ltng-framework'),
@@ -87,12 +87,12 @@
                 Button({ onClick: () => counterStore.setState({ count: counterStore.getState().count + 1 }) }, '+')
             )
         );
-        document.body.appendChild(counterSection);
+        Body.render(counterSection);
 
         // 2. Persisted Theme Store
         const themeStore = createStore({ dark: false }, { persist: 'ltng_theme' });
 
-        const themeBtn = Button({ style: 'margin-top: 10px;' }, 'Toggle Theme');
+        const themeBtn = Button({ class: 'btn', style: 'margin-top: 10px;' }, 'Toggle Theme');
         themeStore.subscribe(setTheme);
 
         const themeSection = Div({ class: 'container', style: 'margin-top: 20px;' },
@@ -106,7 +106,7 @@
 
         themeBtn.onclick = () => themeStore.setState({ dark: !themeStore.getState().dark });
 
-        document.body.appendChild(themeSection);
+        Body.render(themeSection);
     </script>
 </body>
 

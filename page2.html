@@ -27,7 +27,7 @@
         const themeStore = createStore({}, { persist: 'ltng_theme' });
         themeStore.subscribe(setTheme);
 
-        document.body.appendChild(
+        Body.render(
             Div({ class: 'container' },
                 H1({}, 'Page 2'),
                 P({}, 'This page shares the same context (theme) as the home page via localStorage.'),

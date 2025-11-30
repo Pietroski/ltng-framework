@@ -71,21 +71,23 @@ function createElement(tag, props, ...children) {
     }
 
     // Handle children
-    const appendChild = (child) => {
-        if (typeof child === 'string' || typeof child === 'number') {
-            element.appendChild(document.createTextNode(child));
-        } else if (child instanceof Node) {
-            element.appendChild(child);
-        } else if (Array.isArray(child)) {
-            child.forEach(appendChild);
-        } else if (child === null || child === undefined) {
-            // Skip
-        } else {
-            // Try to stringify unknown objects
-            element.appendChild(document.createTextNode(String(child)));
-        }
-    };
+    // const appendChild = (child) => {
+    //     if (typeof child === 'string' || typeof child === 'number') {
+    //         element.appendChild(document.createTextNode(child));
+    //     } else if (child instanceof Node) {
+    //         element.appendChild(child);
+    //     } else if (Array.isArray(child)) {
+    //         child.forEach(appendChild);
+    //     } else if (child === null || child === undefined) {
+    //         // Skip
+    //     } else {
+    //         // Try to stringify unknown objects
+    //         element.appendChild(document.createTextNode(String(child)));
+    //     }
+    //     // render(element, child)
+    // };
 
+    const appendChild = (child) => render(element, child)
     children.forEach(appendChild);
 
     return element;
@@ -170,3 +172,38 @@ window.createStore = (initialState, options = {}) => {
 
     return { getState, setState, subscribe };
 };
+
+// Global Body Alias and Render Method
+Object.defineProperty(window, 'Body', {
+    get: () => document.body
+});
+
+HTMLBodyElement.prototype.render = function (...children) {
+    // children.forEach(child => {
+    //     if (typeof child === 'string' || typeof child === 'number') {
+    //         this.appendChild(document.createTextNode(child));
+    //     } else if (child instanceof Node) {
+    //         this.appendChild(child);
+    //     } else if (Array.isArray(child)) {
+    //         child.forEach(c => this.render(c));
+    //     }
+    // });
+    render(this, ...children)
+};
+
+function render(parent, ...children) {
+    children.forEach(child => {
+        if (typeof child === 'string' || typeof child === 'number') {
+            parent.appendChild(document.createTextNode(child));
+        } else if (child instanceof Node) {
+            parent.appendChild(child);
+        } else if (Array.isArray(child)) {
+            child.forEach(appendChild);
+        } else if (child === null || child === undefined) {
+            // Skip
+        } else {
+            // Try to stringify unknown objects
+            parent.appendChild(document.createTextNode(String(child)));
+        }
+    });
+}
