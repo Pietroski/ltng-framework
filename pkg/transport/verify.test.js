@@ -1,7 +1,9 @@
-const { run } = require("../../testingtools/gotest");
+const { run, Group } = require("../../testingtools/gotest")
 
-require("./http/client.test");
+Group("HTTP Client Tests", () => {
+  require("./http/client.test")
+})
 
-(async () => {
-  await run();
-})();
+  ; (async () => {
+    await run()
+  })()

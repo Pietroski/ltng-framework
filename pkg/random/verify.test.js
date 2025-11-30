@@ -1,8 +1,13 @@
-const { run } = require("../../testingtools/gotest");
+const { run, Group } = require("../../testingtools/gotest")
 
-require("./number.test");
-require("./string.test");
+Group("Number Tests", () => {
+  require("./number.test")
+})
 
-(async () => {
-  await run();
-})();
+Group("String Tests", () => {
+  require("./string.test")
+})
+
+  ; (async () => {
+    await run()
+  })()

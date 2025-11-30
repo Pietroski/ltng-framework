@@ -1,7 +1,9 @@
-const { run } = require("../../testingtools/gotest");
+const { run, Group } = require("../../testingtools/gotest")
 
-require("./index.test");
+Group("Internationalisation Tests", () => {
+  require("./index.test")
+})
 
-(async () => {
-  await run();
-})();
+  ; (async () => {
+    await run()
+  })()

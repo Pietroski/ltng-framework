@@ -1,9 +1,17 @@
-const { run } = require("../../testingtools/gotest");
+const { run, Group } = require("../../testingtools/gotest")
 
-require("./converter/toStyles.test");
-require("./objects/objects.test");
-require("./strings/strings.test");
+Group("Converter Tests", () => {
+  require("./converter/toStyles.test")
+})
 
-(async () => {
-  await run();
-})();
+Group("Object Tests", () => {
+  require("./objects/objects.test")
+})
+
+Group("String Tests", () => {
+  require("./strings/strings.test")
+})
+
+  ; (async () => {
+    await run()
+  })()

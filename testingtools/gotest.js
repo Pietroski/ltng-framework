@@ -1,9 +1,18 @@
 const { color } = require("./colours")
 
 const tests = []
+let currentSuite = ""
+
+function Group(name, fn) {
+  const previousSuite = currentSuite
+  currentSuite = name
+  fn()
+  currentSuite = previousSuite
+}
 
 function Test(name, fn) {
-  tests.push({ name, fn })
+  const testName = currentSuite ? `[${currentSuite}] ${name}` : name
+  tests.push({ name: testName, fn })
 }
 
 async function run() {
@@ -100,5 +109,6 @@ async function run() {
 
 module.exports = {
   Test,
+  Group,
   run,
 }
