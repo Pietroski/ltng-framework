@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ltng-framework Test</title>
+    <script src="ltng-framework.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .header {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        document.body.appendChild(
+            Div({ class: 'container' },
+                Header({ class: 'header' },
+                    H1({}, 'Welcome to ltng-framework'),
+                    P({}, 'This is a test of the lightweight framework.')
+                ),
+                Main({},
+                    P({}, 'Below is a generated list:'),
+                    Ul({},
+                        Li({}, 'Item 1'),
+                        Li({}, 'Item 2'),
+                        Li({}, 'Item 3')
+                    ),
+                    Div({ style: 'margin-top: 20px;' },
+                        Button({
+                            class: 'btn',
+                            onClick: () => overlayModal('Button clicked! This is a custom modal.')
+                        }, 'Click Me')
+                    )
+                ),
+                Footer({ style: 'margin-top: 20px; color: #666;' },
+                    P({}, '© 2023 ltng-framework')
+                )
+            )
+        );
+    </script>
+</body>
+
+</html>
