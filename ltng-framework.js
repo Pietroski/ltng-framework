@@ -41,16 +41,6 @@ function createElement(tag, props, ...children) {
 
     // Handle props
     if (props) {
-        if (props.class === undefined) {
-            props.class = tag.toLowerCase();
-        }
-        if (props.id === undefined) {
-            props.id = generateUUIDv7();
-        }
-        // if (props.type === undefined) {
-        //     props.type = tag.toLowerCase();
-        // }
-
         for (const [key, value] of Object.entries(props)) {
             // Handle special cases like 'className' if needed, but requirements say 'class'
             // For event listeners, we might want to support 'onClick' etc., but let's stick to setAttribute for now
@@ -70,25 +60,7 @@ function createElement(tag, props, ...children) {
         element.setAttribute('id', generateUUIDv7());
     }
 
-    // Handle children
-    // const appendChild = (child) => {
-    //     if (typeof child === 'string' || typeof child === 'number') {
-    //         element.appendChild(document.createTextNode(child));
-    //     } else if (child instanceof Node) {
-    //         element.appendChild(child);
-    //     } else if (Array.isArray(child)) {
-    //         child.forEach(appendChild);
-    //     } else if (child === null || child === undefined) {
-    //         // Skip
-    //     } else {
-    //         // Try to stringify unknown objects
-    //         element.appendChild(document.createTextNode(String(child)));
-    //     }
-    //     // render(element, child)
-    // };
-
-    const appendChild = (child) => render(element, child)
-    children.forEach(appendChild);
+    children.forEach((child) => render(element, child));
 
     return element;
 }
@@ -179,15 +151,6 @@ Object.defineProperty(window, 'Body', {
 });
 
 HTMLBodyElement.prototype.render = function (...children) {
-    // children.forEach(child => {
-    //     if (typeof child === 'string' || typeof child === 'number') {
-    //         this.appendChild(document.createTextNode(child));
-    //     } else if (child instanceof Node) {
-    //         this.appendChild(child);
-    //     } else if (Array.isArray(child)) {
-    //         child.forEach(c => this.render(c));
-    //     }
-    // });
     render(this, ...children)
 };
 
