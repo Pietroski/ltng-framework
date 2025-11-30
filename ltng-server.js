@@ -188,8 +188,17 @@ const server = http.createServer((req, res) => {
         rootDir = path.resolve(DIST_DIR);
     }
 
-    const filePath = path.join(rootDir, url);
-    const ext = path.extname(filePath);
+    let filePath = path.join(rootDir, url);
+    let ext = path.extname(filePath);
+
+    // Fallback: If file not found in rootDir, check project root (only for source mode)
+    if (!fs.existsSync(filePath) && mode !== 'ssg') {
+        const fallbackPath = path.join(__dirname, url);
+        if (fs.existsSync(fallbackPath)) {
+            filePath = fallbackPath;
+            ext = path.extname(filePath);
+        }
+    }
 
     if (fs.existsSync(filePath)) {
         if (ext === '.html') {
