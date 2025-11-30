@@ -5,49 +5,49 @@
 // UUID v7 Generator
 function generateUUIDv7() {
     // 1. Get current timestamp in milliseconds
-    const timestamp = Date.now();
+    const timestamp = Date.now()
 
     // 2. Generate 16 bytes (128 bits) of random data
-    const value = new Uint8Array(16);
-    crypto.getRandomValues(value);
+    const value = new Uint8Array(16)
+    crypto.getRandomValues(value)
 
     // 3. Encode timestamp into the first 48 bits (6 bytes)
     // High 32 bits
-    value[0] = (timestamp >> 40) & 0xff;
-    value[1] = (timestamp >> 32) & 0xff;
-    value[2] = (timestamp >> 24) & 0xff;
-    value[3] = (timestamp >> 16) & 0xff;
+    value[0] = (timestamp >> 40) & 0xff
+    value[1] = (timestamp >> 32) & 0xff
+    value[2] = (timestamp >> 24) & 0xff
+    value[3] = (timestamp >> 16) & 0xff
     // Low 16 bits
-    value[4] = (timestamp >> 8) & 0xff;
-    value[5] = timestamp & 0xff;
+    value[4] = (timestamp >> 8) & 0xff
+    value[5] = timestamp & 0xff
 
     // 4. Set Version to 7 (0111) in the 4 high bits of the 7th byte
-    value[6] = (value[6] & 0x0f) | 0x70;
+    value[6] = (value[6] & 0x0f) | 0x70
 
     // 5. Set Variant to 10xx in the 2 high bits of the 9th byte
-    value[8] = (value[8] & 0x3f) | 0x80;
+    value[8] = (value[8] & 0x3f) | 0x80
 
     // 6. Convert array to standard UUID string format
     return [...value].map((b, i) => {
-        const hex = b.toString(16).padStart(2, '0');
+        const hex = b.toString(16).padStart(2, '0')
         // Insert hyphens at specific positions
-        return (i === 4 || i === 6 || i === 8 || i === 10) ? `-${hex}` : hex;
-    }).join('');
+        return (i === 4 || i === 6 || i === 8 || i === 10) ? `-${hex}` : hex
+    }).join('')
 }
 
 // Expose generateUUIDv7 as well if needed, or keep it internal/global
-window.generateUUIDv7 = generateUUIDv7;
+window.generateUUIDv7 = generateUUIDv7
 
 // Global Body Alias and Render Method
 Object.defineProperty(window, 'Body', {
     get: () => document.body
-});
+})
 
 // Global TextNode Alias
 window.TextNode = (text) => document.createTextNode(text)
 
 // Internal hydration flag
-let isHydrated = false;
+let isHydrated = false
 
 HTMLBodyElement.prototype.render = function (...children) {
     // Auto-hydration: Clear the body on the very first render call.
@@ -56,13 +56,13 @@ HTMLBodyElement.prototype.render = function (...children) {
     // 2. On Client: We clear the SSR content (nuke) and re-render with interactivity (pave).
     if (!isHydrated) {
         while (this.firstChild) {
-            this.removeChild(this.firstChild);
+            this.removeChild(this.firstChild)
         }
-        isHydrated = true;
+        isHydrated = true
     }
 
     render(this, ...children)
-};
+}
 
 HTMLElement.prototype.render = function (...children) {
     render(this, ...children)
@@ -86,12 +86,12 @@ function render(parent, ...children) {
             // Try to stringify unknown objects
             parent.appendChild(TextNode(String(child)))
         }
-    });
+    })
 }
 
 // Core Element Creator
 function createElement(tag, props, ...children) {
-    const element = document.createElement(tag);
+    const element = document.createElement(tag)
 
     // Handle props
     if (props) {
@@ -102,23 +102,23 @@ function createElement(tag, props, ...children) {
             // The requirements example uses setAttribute for everything.
             // However, for standard JS events, it's better to check.
             if (key.startsWith('on') && typeof value === 'function') {
-                const eventName = key.substring(2).toLowerCase();
-                element.addEventListener(eventName, value);
+                const eventName = key.substring(2).toLowerCase()
+                element.addEventListener(eventName, value)
             } else {
-                element.setAttribute(key, value);
+                element.setAttribute(key, value)
             }
         }
     } else {
         // Default props if null/undefined
-        element.setAttribute('class', tag.toLowerCase());
-        element.setAttribute('id', generateUUIDv7());
+        element.setAttribute('class', tag.toLowerCase())
+        element.setAttribute('id', generateUUIDv7())
     }
 
     // it can now be simplified with prototype render call
     // children.forEach((child) => render(element, child));
     element.render(children)
 
-    return element;
+    return element
 }
 
 // Element Wrappers
@@ -127,13 +127,13 @@ const tags = [
     'Div', 'Span', 'Header', 'Footer', 'Main', 'Section', 'Article',
     'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'A', 'Button', 'Input',
     'Label', 'Ul', 'Ol', 'Li', 'Img', 'Form', 'Nav'
-];
+]
 
 tags.forEach(tagName => {
     window[tagName] = (props, ...children) => {
-        return createElement(tagName.toLowerCase(), props, ...children);
-    };
-});
+        return createElement(tagName.toLowerCase(), props, ...children)
+    }
+})
 
 // Simple Modal Component
 window.overlayModal = (props, content) => {
@@ -149,53 +149,53 @@ window.overlayModal = (props, content) => {
                 Button({
                     onClick: (e) => {
                         // Remove the overlay from the DOM
-                        const overlayEl = e.target.closest('[style*="position: fixed"]');
-                        if (overlayEl) overlayEl.remove();
+                        const overlayEl = e.target.closest('[style*="position: fixed"]')
+                        if (overlayEl) overlayEl.remove()
                     },
                     style: 'padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;'
                 }, 'Close')
             )
         )
-    );
+    )
 
-    Body.render(overlay);
-};
+    Body.render(overlay)
+}
 
 // State Management
 window.createStore = (initialState, options = {}) => {
-    let state = initialState;
-    const listeners = new Set();
-    const persistKey = options.persist;
+    let state = initialState
+    const listeners = new Set()
+    const persistKey = options.persist
 
     // Load from localStorage if persist option is set
     if (persistKey) {
-        const saved = localStorage.getItem(persistKey);
+        const saved = localStorage.getItem(persistKey)
         if (saved) {
             try {
-                state = { ...state, ...JSON.parse(saved) };
+                state = { ...state, ...JSON.parse(saved) }
             } catch (e) {
-                console.error('Failed to parse saved state', e);
+                console.error('Failed to parse saved state', e)
             }
         }
     }
 
-    const getState = () => state;
+    const getState = () => state
 
     const setState = (partialState) => {
-        state = { ...state, ...partialState };
+        state = { ...state, ...partialState }
         if (persistKey) {
-            localStorage.setItem(persistKey, JSON.stringify(state));
+            localStorage.setItem(persistKey, JSON.stringify(state))
         }
-        listeners.forEach(listener => listener(state));
-    };
+        listeners.forEach(listener => listener(state))
+    }
 
     const subscribe = (listener) => {
-        listeners.add(listener);
+        listeners.add(listener)
         // Call listener immediately with current state
-        listener(state);
+        listener(state)
         // Return unsubscribe function
-        return () => listeners.delete(listener);
-    };
+        return () => listeners.delete(listener)
+    }
 
-    return { getState, setState, subscribe };
-};
+    return { getState, setState, subscribe }
+}

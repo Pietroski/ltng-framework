@@ -24,8 +24,8 @@
 <body>
     <script>
         // Initialize the SAME store with the SAME persist key
-        const themeStore = createStore({}, { persist: 'ltng_theme' });
-        themeStore.subscribe(setTheme);
+        const themeStore = createStore({}, { persist: 'ltng_theme' })
+        themeStore.subscribe(setTheme)
 
         Body.render(
             Div({ class: 'container' },
@@ -41,7 +41,7 @@
                     A({ href: 'index.html', style: 'color: #007bff;' }, 'Back to Home')
                 )
             )
-        );
+        )
     </script>
 </body>
 

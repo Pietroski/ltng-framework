@@ -5,22 +5,22 @@
 
 class Node {
     constructor() {
-        this.childNodes = [];
+        this.childNodes = []
     }
 
     appendChild(child) {
-        if (!child) return;
-        this.childNodes.push(child);
-        child.parentNode = this;
-        return child;
+        if (!child) return
+        this.childNodes.push(child)
+        child.parentNode = this
+        return child
     }
 
     // Stub for remove
     remove() {
         if (this.parentNode) {
-            const index = this.parentNode.childNodes.indexOf(this);
+            const index = this.parentNode.childNodes.indexOf(this)
             if (index > -1) {
-                this.parentNode.childNodes.splice(index, 1);
+                this.parentNode.childNodes.splice(index, 1)
             }
         }
     }
@@ -28,35 +28,35 @@ class Node {
 
 class TextNode extends Node {
     constructor(text) {
-        super();
-        this.textContent = text;
+        super()
+        this.textContent = text
     }
 
     toString() {
-        return this.textContent;
+        return this.textContent
     }
 }
 
 class HTMLElement extends Node {
     constructor(tagName) {
-        super();
-        this.tagName = tagName.toLowerCase();
-        this.attributes = {};
-        this.style = {};
+        super()
+        this.tagName = tagName.toLowerCase()
+        this.attributes = {}
+        this.style = {}
         this.classList = {
             add: (...classes) => {
-                const existing = (this.attributes['class'] || '').split(' ').filter(Boolean);
-                this.attributes['class'] = [...new Set([...existing, ...classes])].join(' ');
+                const existing = (this.attributes['class'] || '').split(' ').filter(Boolean)
+                this.attributes['class'] = [...new Set([...existing, ...classes])].join(' ')
             }
-        };
+        }
     }
 
     setAttribute(name, value) {
-        this.attributes[name] = String(value);
+        this.attributes[name] = String(value)
     }
 
     getAttribute(name) {
-        return this.attributes[name];
+        return this.attributes[name]
     }
 
     addEventListener() {
@@ -64,90 +64,90 @@ class HTMLElement extends Node {
     }
 
     // Stub for closest
-    closest() { return null; }
+    closest() { return null }
 
     toString() {
         const attrs = Object.entries(this.attributes)
             .map(([key, val]) => ` ${key}="${val}"`)
-            .join('');
+            .join('')
 
         const styleStr = Object.entries(this.style)
             .map(([key, val]) => `${key.replace(/[A-Z]/g, m => '-' + m.toLowerCase())}:${val}`)
-            .join(';');
+            .join(';')
 
-        const styleAttr = styleStr ? ` style="${styleStr}"` : '';
+        const styleAttr = styleStr ? ` style="${styleStr}"` : ''
 
         // Self-closing tags
         if (['img', 'input', 'br', 'hr', 'meta', 'link'].includes(this.tagName)) {
-            return `<${this.tagName}${attrs}${styleAttr} />`;
+            return `<${this.tagName}${attrs}${styleAttr} />`
         }
 
-        const childrenHtml = this.childNodes.map(c => c.toString()).join('');
-        return `<${this.tagName}${attrs}${styleAttr}>${childrenHtml}</${this.tagName}>`;
+        const childrenHtml = this.childNodes.map(c => c.toString()).join('')
+        return `<${this.tagName}${attrs}${styleAttr}>${childrenHtml}</${this.tagName}>`
     }
 }
 
 class HTMLBodyElement extends HTMLElement {
     constructor() {
-        super('body');
+        super('body')
     }
 }
 
 class HTMLUnknownElement extends HTMLElement {
     constructor(tagName) {
-        super(tagName);
+        super(tagName)
     }
 }
 
 // Mock Document
 class Document {
     constructor() {
-        this.body = new HTMLBodyElement();
+        this.body = new HTMLBodyElement()
     }
 
     createElement(tagName) {
-        if (tagName.toLowerCase() === 'body') return this.body;
+        if (tagName.toLowerCase() === 'body') return this.body
         // For known tags, we could return specific classes, but HTMLElement is fine.
         // For unknown, technically HTMLUnknownElement, but for this mock, HTMLElement is sufficient.
         // However, the framework extends HTMLUnknownElement.prototype, so we need it.
-        return new HTMLElement(tagName);
+        return new HTMLElement(tagName)
     }
 
     createTextNode(text) {
-        return new TextNode(text);
+        return new TextNode(text)
     }
 }
 
 // Mock Window
 class Window {
     constructor() {
-        this.document = new Document();
-        this.console = console;
-        this.HTMLElement = HTMLElement;
-        this.HTMLBodyElement = HTMLBodyElement;
-        this.HTMLUnknownElement = HTMLUnknownElement;
-        this.Node = Node;
-        this.TextNode = TextNode; // For our framework's alias
+        this.document = new Document()
+        this.console = console
+        this.HTMLElement = HTMLElement
+        this.HTMLBodyElement = HTMLBodyElement
+        this.HTMLUnknownElement = HTMLUnknownElement
+        this.Node = Node
+        this.TextNode = TextNode // For our framework's alias
         this.localStorage = {
             getItem: () => null,
             setItem: () => { },
             removeItem: () => { },
             clear: () => { }
-        };
+        }
         this.crypto = {
             getRandomValues: (arr) => {
                 // Simple pseudo-random for server
                 for (let i = 0; i < arr.length; i++) {
-                    arr[i] = Math.floor(Math.random() * 256);
+                    arr[i] = Math.floor(Math.random() * 256)
                 }
-                return arr;
+                return arr
             }
-        };
+        }
     }
 }
 
 function createWindow() {
-    return new Window();
+    return new Window()
 }
 
 module.exports = {
@@ -157,4 +157,4 @@ module.exports = {
     HTMLUnknownElement,
     Node,
     TextNode
-};
+}
