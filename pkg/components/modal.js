@@ -5,6 +5,8 @@ import { Div } from './containers.js'
 window.loadCSS('/pkg/styles/theme.css')
 window.loadCSS('/pkg/components/modal.css')
 
+const GlobalDiv = window.Div
+
 export const Modal = (props, ...children) => {
 	const {
 		isOpen,
@@ -19,7 +21,7 @@ export const Modal = (props, ...children) => {
 	if (!isOpen) return null
 
 	// The background overlay that handles clicks
-	const backgroundOverlay = Div({
+	const backgroundOverlay = GlobalDiv({
 		class: 'ltng-modal-overlay',
 		onClick: (e) => {
 			if (closeFromOutside && onClose) {
@@ -47,7 +49,7 @@ export const Modal = (props, ...children) => {
     if (className) containerClasses.push(className)
 
 	// The main container holding both
-	const baseContainer = Div({
+	const baseContainer = GlobalDiv({
 		class: containerClasses.join(' ')
 	}, backgroundOverlay, content)
 

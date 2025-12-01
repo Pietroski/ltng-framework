@@ -13,13 +13,12 @@
 
 .ltng-modal-overlay {
     position: absolute;
-    /* position: fixed; */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    /* background-color: #333; */
-    background-color: #811e1e;
+    background-color: #333;
+    /* background-color: #811e1e; */
     opacity: 0.6;
     z-index: 1;
 }
