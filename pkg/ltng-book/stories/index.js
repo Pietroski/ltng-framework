@@ -1,10 +1,11 @@
-import './button.story.js';
-import './card.story.js';
-import './input.story.js';
-import './typography.story.js';
-import './containers.story.js';
-import './footer.story.js';
-import './form.story.js';
-import './modal.story.js';
-import './toast.story.js';
-export { stories } from './registry.js';
+import './button.story.js'
+import './card.story.js'
+import './input.story.js'
+import './typography.story.js'
+import './containers.story.js'
+import './footer.story.js'
+import './form.story.js'
+import './modal.story.js'
+import './toast.story.js'
+
+export { stories } from './registry.js'

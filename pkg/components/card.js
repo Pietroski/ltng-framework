@@ -74,7 +74,7 @@ Card.Closable = (props, ...children) => {
 
 	// Simple state simulation for the component instance
 	// In a real framework this would be handled by a reactive primitive
-	// Here we just render if open is true, but we can't easily re-render *just* this component 
+	// Here we just render if open is true, but we can't easily re-render *just* this component
 	// without a reactive system or re-rendering the whole tree.
 	// For ltng-book visualization, we might just show it always open or use a simple toggle that re-renders the story.
 

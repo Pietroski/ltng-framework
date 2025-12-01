@@ -1,7 +1,6 @@
-const models = require('./http/models');
-const client = require('./http/client');
-
+const models = require('./http/models')
+const client = require('./http/client')
 module.exports = {
-  ...models,
-  ...client
-};
+	...models,
+	...client
+}
