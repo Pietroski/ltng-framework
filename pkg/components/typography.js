@@ -6,35 +6,38 @@ function styleToString(styleObj) {
 	}).join('; ')
 }
 
-const Colours = {
-	Whitesmoke: 'whitesmoke',
-	Black: 'black',
-}
+// Load styles
+window.loadCSS('/pkg/styles/theme.css')
+window.loadCSS('/pkg/components/typography.css')
 
-const DefaultTypographyStyle = (darkMode) => ({
-	color: darkMode ? Colours.Whitesmoke : Colours.Black,
-	fontFamily: 'inherit',
-	margin: '0', // Reset default margins for better control
-})
+const createTypographyComponent = (tag, variantClass) => (props, ...children) => {
+	const { darkMode = true, className = '', style, ...rest } = props || {}
 
-const createTypographyComponent = (tag) => (props, ...children) => {
-	const { darkMode = true, style, ...rest } = props || {}
+    const classes = ['ltng-typography']
+    
+    if (variantClass) {
+        classes.push(variantClass)
+    }
 
-	const componentStyles = {
-		...DefaultTypographyStyle(darkMode),
-		...(style || {})
-	}
+    if (darkMode) {
+        classes.push('ltng-typography--dark')
+    } else {
+        classes.push('ltng-typography--light')
+    }
+
+    if (className) {
+        classes.push(className)
+    }
 
 	// Use the global element wrappers from ltng-framework if available, or fallback to createElement
 	const elementCreator = window[tag] || ((p, ...c) => {
-		const el = document.createElement(tag.toLowerCase())
-		// ... apply props ... (simplified here as we assume window[tag] exists)
 		return window.createElement(tag.toLowerCase(), p, ...c)
 	})
 
 	return elementCreator({
 		...rest,
-		style: styleToString(componentStyles)
+		class: classes.join(' '),
+        style: typeof style === 'object' ? styleToString(style) : style
 	}, ...children)
 }
 
@@ -42,10 +45,10 @@ export const Typography = (props, ...children) => {
 	return createTypographyComponent('Div')(props, ...children)
 }
 
-Typography.H1 = createTypographyComponent('H1')
-Typography.H2 = createTypographyComponent('H2')
-Typography.H3 = createTypographyComponent('H3')
-Typography.H4 = createTypographyComponent('H4')
-Typography.H5 = createTypographyComponent('H5')
-Typography.Paragraph = createTypographyComponent('P')
-Typography.Span = createTypographyComponent('Span')
+Typography.H1 = createTypographyComponent('H1', 'ltng-typography-h1')
+Typography.H2 = createTypographyComponent('H2', 'ltng-typography-h2')
+Typography.H3 = createTypographyComponent('H3', 'ltng-typography-h3')
+Typography.H4 = createTypographyComponent('H4', 'ltng-typography-h4')
+Typography.H5 = createTypographyComponent('H5', 'ltng-typography-h5')
+Typography.Paragraph = createTypographyComponent('P', 'ltng-typography-p')
+Typography.Span = createTypographyComponent('Span', 'ltng-typography-span')

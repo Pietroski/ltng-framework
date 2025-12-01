@@ -57,57 +57,40 @@ const createToastStore = () => {
 	}
 }
 
+// Load styles
+window.loadCSS('/pkg/styles/theme.css')
+window.loadCSS('/pkg/components/toast.css')
+
 export const toastStore = createToastStore()
-
-const ToastCardStyles = (type, darkMode, index) => {
-	const base = {
-		width: '400px',
-		height: '100px',
-		position: 'absolute',
-		top: `${index * 110 + 20}px`, // Stack them
-		right: 'calc(50% - 200px)',
-		transition: 'all 0.3s ease',
-		zIndex: 2000 + index,
-		display: 'flex',
-		justifyContent: 'center',
-		alignItems: 'center',
-		color: 'white',
-	}
-
-	switch (type) {
-		case 'warning':
-			return { ...base, backgroundColor: Colours.Whitesmoke, color: Colours.Primary, border: `1px solid ${Colours.Primary}` }
-		case 'success':
-			return { ...base, backgroundColor: Colours.Primary, border: 'none' }
-		case 'failure':
-			return { ...base, backgroundColor: Colours.DarkRed, border: 'none' }
-		default:
-			return { ...base, backgroundColor: darkMode ? Colours.DarkGray : Colours.Whitesmoke, color: darkMode ? 'white' : 'black' }
-	}
-}
 
 export const Toast = {
 	Container: (props) => {
 		const { store = toastStore, darkMode = true } = props || {}
 		const container = Div({
-			style: {
-				position: 'fixed',
-				top: '0',
-				left: '0',
-				width: '100%',
-				height: '0', // Don't block clicks
-				overflow: 'visible',
-				zIndex: '2000'
-			}
+            class: 'ltng-toast-container'
 		})
 
 		const renderToasts = (list) => {
 			container.innerHTML = '' // Clear current
 			list.forEach((t, index) => {
+                const classes = ['ltng-toast-card']
+                
+                if (t.type === 'warning') classes.push('ltng-toast-card--warning')
+                else if (t.type === 'success') classes.push('ltng-toast-card--success')
+                else if (t.type === 'failure') classes.push('ltng-toast-card--failure')
+                else {
+                    if (darkMode) classes.push('ltng-toast-card--default-dark')
+                    else classes.push('ltng-toast-card--default-light')
+                }
+
 				const toastCard = Card.Closable({
 					darkMode,
 					onCloseClick: () => store.remove(t.id),
-					style: ToastCardStyles(t.type, darkMode, index),
+                    className: classes.join(' '),
+					style: {
+                        marginTop: `${index * 110}px`,
+                        zIndex: 2000 + index
+                    },
 					closeBtnStyle: { borderColor: t.type === 'failure' ? 'white' : 'currentColor' }
 				},
 					Typography.Paragraph({ style: { margin: 0, color: 'inherit' } }, t.message)

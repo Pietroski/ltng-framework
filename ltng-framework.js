@@ -38,6 +38,16 @@ function generateUUIDv7() {
 // Expose generateUUIDv7 as well if needed, or keep it internal/global
 window.generateUUIDv7 = generateUUIDv7
 
+// CSS Loader Helper
+window.loadCSS = (href) => {
+	if (!document.querySelector(`link[href="${href}"]`)) {
+		const link = document.createElement('link')
+		link.rel = 'stylesheet'
+		link.href = href
+		document.head.appendChild(link)
+	}
+}
+
 // Global Body Alias and Render Method
 Object.defineProperty(window, 'Body', {
 	get: () => document.body

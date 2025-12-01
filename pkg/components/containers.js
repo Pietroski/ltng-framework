@@ -37,66 +37,48 @@ export const FlexStyleOpts = {
 	},
 }
 
-const DefaultContainerStyling = {
-	width: '100%',
-	height: '100%',
-	boxSizing: 'border-box',
-}
-
-const FlexContainerStyling = {
-	display: 'flex',
-}
-
-const GridContainerStyling = {
-	display: 'grid',
-}
+// Load styles
+window.loadCSS('/pkg/styles/theme.css')
+window.loadCSS('/pkg/components/containers.css')
 
 // Alias global Div to avoid recursion if we named it Div
 const GlobalDiv = window.Div
 
 export const Div = (props, ...children) => {
-	const { style, ...rest } = props || {}
+	const { className = '', style, ...rest } = props || {}
 
-	const componentStyles = {
-		...DefaultContainerStyling,
-		...(style || {})
-	}
+    const classes = ['ltng-container']
+    if (className) classes.push(className)
 
 	return GlobalDiv({
 		...rest,
-		style: styleToString(componentStyles)
+		class: classes.join(' '),
+        style: typeof style === 'object' ? styleToString(style) : style
 	}, ...children)
 }
 
 Div.Flex = (props, ...children) => {
-	const { style, ...rest } = props || {}
+	const { className = '', style, ...rest } = props || {}
 
-	// Allow passing FlexStyleOpts directly in style or via a helper
-	// For now, we assume style is a plain object
-
-	const componentStyles = {
-		...DefaultContainerStyling,
-		...FlexContainerStyling,
-		...(style || {})
-	}
+    const classes = ['ltng-container', 'ltng-container--flex']
+    if (className) classes.push(className)
 
 	return GlobalDiv({
 		...rest,
-		style: styleToString(componentStyles)
+		class: classes.join(' '),
+        style: typeof style === 'object' ? styleToString(style) : style
 	}, ...children)
 }
 
 Div.Grid = (props, ...children) => {
-	const { style, ...rest } = props || {}
+	const { className = '', style, ...rest } = props || {}
 
-	const componentStyles = {
-		...DefaultContainerStyling,
-		...GridContainerStyling,
-		...(style || {})
-	}
+    const classes = ['ltng-container', 'ltng-container--grid']
+    if (className) classes.push(className)
 
 	return GlobalDiv({
 		...rest,
-		style: styleToString(componentStyles)
+		class: classes.join(' '),
+        style: typeof style === 'object' ? styleToString(style) : style
 	}, ...children)
 }

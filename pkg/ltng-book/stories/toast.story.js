@@ -12,8 +12,8 @@ registerStory('Toast', 'Toast notifications.', () => {
 	// To make it appear inside this story container for demo purposes, we might need to override styles.
 	// But let's stick to default fixed behavior first to verify it works as intended (overlay).
 
-	container.appendChild(Toast.Container({ darkMode: true }))
 	container.appendChild(Div({ style: { marginBottom: '20px', height: 'auto' } },
+		Toast.Container({ darkMode: true }),
 		Typography.H3({ darkMode: false }, 'Toast Demo'),
 		Typography.Paragraph({ darkMode: false }, 'Click buttons to show toasts.')
 	))

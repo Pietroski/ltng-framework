@@ -93,6 +93,12 @@ class HTMLBodyElement extends HTMLElement {
 	}
 }
 
+class HTMLHeadElement extends HTMLElement {
+	constructor() {
+		super('head')
+	}
+}
+
 class HTMLUnknownElement extends HTMLElement {
 	constructor(tagName) {
 		super(tagName)
@@ -102,6 +108,7 @@ class HTMLUnknownElement extends HTMLElement {
 // Mock Document
 class Document {
 	constructor() {
+		this.head = new HTMLHeadElement()
 		this.body = new HTMLBodyElement()
 	}
 

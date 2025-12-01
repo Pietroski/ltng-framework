@@ -3,7 +3,7 @@
 * A zero-dependency SSR/SSG server for ltng-framework.
 *
 * Usage:
-	*   node ltng-server.js           (Starts SSR server on port 3000)
+*   node ltng-server.js           (Starts SSR server on port 3000)
 *   node ltng-server.js --build   (Generates static files in ./dist)
 */
 
@@ -28,7 +28,7 @@ function renderFile(filePath) {
 	sandbox.window = sandbox // Circular reference
 	sandbox.global = sandbox // Node.js global reference
 
-	// Add Node.js globals that might be needed
+	// 3. Add Node.js globals that might be needed
 	sandbox.console = console
 	sandbox.setTimeout = setTimeout
 	sandbox.clearTimeout = clearTimeout
@@ -37,7 +37,7 @@ function renderFile(filePath) {
 
 	vm.createContext(sandbox)
 
-	// 3. Parse HTML to find scripts
+	// 4. Parse HTML to find scripts
 	// This is a very naive parser. It assumes scripts are <script src="..."> or inline <script>...</script>
 	// It does NOT handle complex HTML parsing.
 
@@ -48,11 +48,7 @@ function renderFile(filePath) {
 	let match
 	while ((match = scriptRegex.exec(content)) !== null) {
 		const fullTag = match[0]
-
-		// Skip module scripts in SSR as vm doesn't support them easily
-		if (fullTag.includes('type="module"')) {
-			continue
-		}
+        const isModule = fullTag.includes('type="module"')
 
 		const innerScript = match[1]
 		const srcMatch = srcRegex.exec(fullTag)
@@ -61,24 +57,101 @@ function renderFile(filePath) {
 			// External script
 			const scriptPath = path.join(path.dirname(filePath), srcMatch[1])
 			if (fs.existsSync(scriptPath)) {
-				const scriptContent = fs.readFileSync(scriptPath, 'utf8')
+				let scriptContent = fs.readFileSync(scriptPath, 'utf8')
+                
+                if (isModule) {
+                    // Basic ESM transpilation for SSR
+                    // 1. Remove imports (we assume we load them recursively or they are already loaded? No, we need to load them)
+                    // Actually, handling recursive imports is hard.
+                    // For now, let's assume flat structure or just strip imports and exports and hope globals match.
+                    // But imports are needed for execution order.
+                    
+                    // Regex to find imports: import { X } from './path.js'
+                    const importRegex = /import\s+(?:{[^}]+}|\w+)\s+from\s+['"](.*?)['"]/g
+                    let importMatch
+                    while ((importMatch = importRegex.exec(scriptContent)) !== null) {
+                        const importPath = path.join(path.dirname(scriptPath), importMatch[1])
+                        if (fs.existsSync(importPath)) {
+                             console.log(`Loading imported module: ${importMatch[1]}`)
+                             // Recursively load imported file
+                             const importedContent = fs.readFileSync(importPath, 'utf8')
+                             // Transpile and run imported content first
+                             // Fix: Assign to both var (global) and window property
+                             // Regex matches "export const Name", replacement "var Name = window.Name"
+                             // The original "=" follows the match, so we get "var Name = window.Name = ..."
+                             const transpiledImport = importedContent
+                                .replace(/export\s+const\s+(\w+)/g, 'var $1 = window.$1')
+                                .replace(/export\s+default\s+(\w+)/g, 'window.default = $1')
+                                .replace(/import\s+.*?from\s+['"].*?['"]/g, '') // Remove imports from imported file
+                             
+                             try {
+                                vm.runInContext(transpiledImport, sandbox)
+                                console.log(`Successfully loaded ${importMatch[1]}`)
+                             } catch(e) {
+                                 console.error(`Error running imported script ${importMatch[1]}:`, e)
+                             }
+                        } else {
+                            console.error(`Import not found: ${importPath}`)
+                        }
+                    }
+
+                    // Transpile current script
+                    scriptContent = scriptContent
+                        .replace(/export\s+const\s+(\w+)/g, 'var $1 = window.$1')
+                        .replace(/export\s+default\s+(\w+)/g, 'window.default = $1')
+                        .replace(/import\s+.*?from\s+['"].*?['"]/g, '') // Remove imports
+                    
+                    console.log('Running transpiled module script...')
+                }
+
 				try {
 					vm.runInContext(scriptContent, sandbox)
 				} catch (e) {
 					console.error(`Error running script ${srcMatch[1]}:`, e)
 				}
+			} else {
+				console.error(`Script not found: ${scriptPath} (referenced from ${filePath})`)
 			}
 		} else if (innerScript.trim()) {
 			// Inline script
+            let scriptToRun = innerScript
+            if (isModule) {
+                 console.log('Processing inline module script...')
+                 // Handle imports in inline module
+                 const importRegex = /import\s+(?:{[^}]+}|\w+)\s+from\s+['"](.*?)['"]/g
+                 let importMatch
+                 while ((importMatch = importRegex.exec(innerScript)) !== null) {
+                        const importPath = path.join(path.dirname(filePath), importMatch[1])
+                        if (fs.existsSync(importPath)) {
+                             console.log(`Loading inline import: ${importMatch[1]}`)
+                             const importedContent = fs.readFileSync(importPath, 'utf8')
+                             const transpiledImport = importedContent
+                                .replace(/export\s+const\s+(\w+)/g, 'var $1 = window.$1')
+                                .replace(/export\s+default\s+(\w+)/g, 'window.default = $1')
+                                .replace(/import\s+.*?from\s+['"].*?['"]/g, '')
+                             
+                             try {
+                                vm.runInContext(transpiledImport, sandbox)
+                                console.log(`Successfully loaded inline import ${importMatch[1]}`)
+                             } catch(e) {
+                                 console.error(`Error running imported script ${importMatch[1]}:`, e)
+                             }
+                        } else {
+                            console.error(`Inline import not found: ${importPath}`)
+                        }
+                 }
+                 scriptToRun = scriptToRun.replace(/import\s+.*?from\s+['"].*?['"]/g, '')
+            }
+
 			try {
-				vm.runInContext(innerScript, sandbox)
+				vm.runInContext(scriptToRun, sandbox)
 			} catch (e) {
 				console.error('Error running inline script:', e)
 			}
 		}
 	}
 
-	// 4. Serialize
+	// 5. Serialize
 	// We inject the rendered body content back into the HTML
 	// Naive injection: replace <body>...</body> or append to body if empty in source
 	// Actually, our mock DOM only populated `document.body`.
@@ -104,7 +177,24 @@ function renderFile(filePath) {
 	}
 
 	const bodyContent = document.body.toString().replace('</body>', `${scripts}</body>`)
-	const finalHtml = content.replace(bodyRegex, bodyContent)
+	let finalHtml = content.replace(bodyRegex, bodyContent)
+
+	// Inject Head Content (Styles)
+	const headRegex = /<head\b[^>]*>([\s\S]*?)<\/head>/i
+	// We only want to append new links/styles to the existing head
+	// document.head.toString() returns <head>...</head>
+	// We want the inner content of our mock head
+	const mockHeadContent = document.head.childNodes.map(c => c.toString()).join('')
+	
+	if (mockHeadContent) {
+		if (headRegex.test(finalHtml)) {
+			finalHtml = finalHtml.replace('</head>', `${mockHeadContent}</head>`)
+		} else {
+			// No head tag? prepend to body or html?
+			// Ideally HTML should have head. If not, we might insert it before body.
+			// For now, assume valid HTML structure or just ignore if no head.
+		}
+	}
 
 	return finalHtml
 }
@@ -156,7 +246,17 @@ if (isBuild) {
 				}
 			}
 
-			const html = renderFile(filePath)
+			let html = renderFile(filePath)
+
+            // Rewrite asset paths to be flat in dist
+            referencedScripts.forEach(scriptPath => {
+                const fileName = path.basename(scriptPath)
+                // Simple string replacement for now. 
+                // In a robust system we'd parse HTML, but here we just replace the src string.
+                // We use split/join to replace all occurrences.
+                html = html.split(scriptPath).join(fileName)
+            })
+
 			fs.writeFileSync(path.join(DIST_DIR, file), html)
 			console.log(`Saved ${file}`)
 		} catch (e) {
@@ -168,15 +268,19 @@ if (isBuild) {
 	referencedScripts.forEach(file => {
 		const filePath = path.join(SRC_DIR, file)
 		if (fs.existsSync(filePath)) {
-			// Create subdirectories if needed (e.g. css/style.css)
-			const destPath = path.join(DIST_DIR, file)
-			const destDir = path.dirname(destPath)
-			if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true })
-
-			fs.copyFileSync(filePath, destPath)
-			console.log(`Copied referenced asset: ${file}`)
+			// Flatten structure: copy all assets to root of dist
+			const fileName = path.basename(file)
+			const destPath = path.join(DIST_DIR, fileName)
+            
+            // Ensure we don't overwrite if multiple files have same name (naive check)
+            if (fs.existsSync(destPath)) {
+                console.log(`Asset ${fileName} already exists in dist, skipping copy.`)
+            } else {
+			    fs.copyFileSync(filePath, destPath)
+			    console.log(`Copied referenced asset: ${file} -> ${fileName}`)
+            }
 		} else {
-			console.warn(`Warning: Referenced asset ${file} not found.`)
+			console.warn(`Warning: Referenced asset ${file} not found at ${filePath}`)
 		}
 	})
 

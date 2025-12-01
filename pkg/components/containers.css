@@ -1,0 +1,13 @@
+.ltng-container {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.ltng-container--flex {
+    display: flex;
+}
+
+.ltng-container--grid {
+    display: grid;
+}

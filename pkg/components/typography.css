@@ -1,0 +1,46 @@
+.ltng-typography {
+    font-family: var(--ltng-font-family);
+    margin: 0;
+    color: var(--ltng-color-text);
+}
+
+.ltng-typography--dark {
+    color: var(--ltng-color-white);
+}
+
+.ltng-typography--light {
+    color: var(--ltng-color-text);
+}
+
+.ltng-typography-h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+
+.ltng-typography-h2 {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.ltng-typography-h3 {
+    font-size: 1.75rem;
+    font-weight: bold;
+}
+
+.ltng-typography-h4 {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.ltng-typography-h5 {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.ltng-typography-p {
+    font-size: var(--ltng-font-size-md);
+}
+
+.ltng-typography-span {
+    font-size: inherit;
+}

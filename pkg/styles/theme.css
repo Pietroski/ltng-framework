@@ -1,0 +1,26 @@
+:root {
+    /* Colors */
+    --ltng-color-primary: #1976d2;
+    --ltng-color-primary-hover: #1565c0;
+    --ltng-color-secondary: #dc004e;
+    --ltng-color-text: #333;
+    --ltng-color-background: #fff;
+    --ltng-color-disabled: #bdbdbd;
+    --ltng-color-white: #ffffff;
+
+    /* Spacing */
+    --ltng-spacing-xs: 4px;
+    --ltng-spacing-sm: 8px;
+    --ltng-spacing-md: 16px;
+    --ltng-spacing-lg: 24px;
+    --ltng-spacing-xl: 32px;
+
+    /* Typography */
+    --ltng-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --ltng-font-size-sm: 14px;
+    --ltng-font-size-md: 16px;
+    --ltng-font-size-lg: 20px;
+    
+    /* Borders */
+    --ltng-border-radius: 4px;
+}

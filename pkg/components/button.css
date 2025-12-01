@@ -1,0 +1,36 @@
+.ltng-button {
+    padding: 10px 20px;
+    border: 1px solid transparent;
+    border-radius: var(--ltng-border-radius);
+    cursor: pointer;
+    font-size: var(--ltng-font-size-md);
+    font-family: inherit;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.ltng-button--primary {
+    background-color: var(--ltng-color-primary);
+    color: var(--ltng-color-white);
+    border: none;
+}
+
+.ltng-button--primary:hover {
+    background-color: var(--ltng-color-primary-hover);
+}
+
+.ltng-button--secondary {
+    background-color: transparent;
+    color: var(--ltng-color-primary);
+    border: 1px solid var(--ltng-color-primary);
+}
+
+.ltng-button--secondary:hover {
+    background-color: rgba(25, 118, 210, 0.04);
+}
+
+.ltng-button:disabled {
+    background-color: var(--ltng-color-disabled);
+    cursor: not-allowed;
+    color: var(--ltng-color-white);
+    border: none;
+}
