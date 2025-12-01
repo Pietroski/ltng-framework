@@ -1,8 +1,8 @@
-const { Test } = require("../../../testingtools/gotest");
+const { Test } = require("../../../testingtools/gotest")
 const {
   kebabToLowerSnakeCase,
   lowerCamelCaseToLowerCaseLowerKebabCase,
-} = require("./strings");
+} = require("./strings")
 
 Test("lowerCamelCaseToLowerCaseLowerKebabCase table tests with object", (t) => {
   const objMatching = {
@@ -15,7 +15,7 @@ Test("lowerCamelCaseToLowerCaseLowerKebabCase table tests with object", (t) => {
     const str = lowerCamelCaseToLowerCaseLowerKebabCase(key)
     t.Equal(str, objMatching[key], `Should convert ${key} to ${objMatching[key]}`)
   }
-});
+})
 
 Test("lowerCamelCaseToLowerCaseLowerKebabCase table tests with list", (t) => {
   const listMatching = [
@@ -28,7 +28,7 @@ Test("lowerCamelCaseToLowerCaseLowerKebabCase table tests with list", (t) => {
     const str = lowerCamelCaseToLowerCaseLowerKebabCase(key)
     t.Equal(str, value, `Should convert ${key} to ${value}`)
   }
-});
+})
 
 Test("kebabToLowerSnakeCase table tests with object", (t) => {
   const objMatching = {
@@ -40,7 +40,7 @@ Test("kebabToLowerSnakeCase table tests with object", (t) => {
     const str = kebabToLowerSnakeCase(key)
     t.Equal(str, objMatching[key], `Should convert ${key} to ${objMatching[key]}`)
   }
-});
+})
 
 Test("kebabToLowerSnakeCase table tests with list", (t) => {
   const listMatching = [
@@ -52,4 +52,4 @@ Test("kebabToLowerSnakeCase table tests with list", (t) => {
     const str = kebabToLowerSnakeCase(key)
     t.Equal(str, value, `Should convert ${key} to ${value}`)
   }
-});
+})
