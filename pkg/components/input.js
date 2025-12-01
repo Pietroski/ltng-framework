@@ -68,6 +68,9 @@ const SecretDivStyles = (darkMode) => ({
 	color: darkMode ? '#ffffff' : '#000000',
 })
 
+// Alias global Input to avoid recursion if we named it Input
+const GlobalInput = window.Input
+
 export const Input = (props) => {
 	const {
 		id,
@@ -86,7 +89,7 @@ export const Input = (props) => {
 	const inputId = id || `input-${Math.random().toString(36).substring(2, 11)}`
 	let currentType = isSecret ? 'password' : type
 
-	const inputEl = window.Input({
+	const inputEl = GlobalInput({
 		id: inputId,
 		type: currentType,
 		value: value || '',

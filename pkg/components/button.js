@@ -37,9 +37,11 @@ const DisabledStyles = {
     color: 'white',
 }
 
+const GlobalButton = window.Button
+
 export const Button = (props, ...children) => {
     const { variant = 'default', disabled, style, ...rest } = props || {}
-    
+
     let componentStyles = { ...BaseStyles }
 
     if (variant === 'primary') {
@@ -57,18 +59,16 @@ export const Button = (props, ...children) => {
         componentStyles = { ...componentStyles, ...style }
     }
 
-    // Use the global Button from ltng-framework
-    // Use the global Button from ltng-framework
     const buttonProps = {
         ...rest,
         style: styleToString(componentStyles)
-    };
-
-    if (disabled) {
-        buttonProps.disabled = true;
     }
 
-    return window.Button(buttonProps, ...children)
+    if (disabled) {
+        buttonProps.disabled = true
+    }
+
+    return GlobalButton(buttonProps, ...children)
 }
 
 Button.Primary = (props, ...children) => Button({ ...props, variant: 'primary' }, ...children)

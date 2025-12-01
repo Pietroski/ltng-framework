@@ -1,12 +1,12 @@
-import { Card } from './card.js';
-import { Div } from './containers.js';
+import { Card } from './card.js'
+import { Div } from './containers.js'
 
 // Helper to convert style object to string
 function styleToString(styleObj) {
     return Object.entries(styleObj || {}).map(([key, value]) => {
-        const kebabKey = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase();
-        return `${kebabKey}: ${value}`;
-    }).join('; ');
+        const kebabKey = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
+        return `${kebabKey}: ${value}`
+    }).join('; ')
 }
 
 const Colours = {
@@ -14,7 +14,7 @@ const Colours = {
     MediumDarkerGray: '#444',
     Whitesmoke: 'whitesmoke',
     Primary: '#1976d2',
-};
+}
 
 // Base container that covers the screen and centers content
 const BaseContainerStyles = (darkMode) => ({
@@ -28,7 +28,7 @@ const BaseContainerStyles = (darkMode) => ({
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: '1000',
-});
+})
 
 // The semi-transparent background overlay
 const BackgroundOverlayStyles = (darkMode) => ({
@@ -40,29 +40,29 @@ const BackgroundOverlayStyles = (darkMode) => ({
     backgroundColor: Colours.DarkGray,
     opacity: '0.6',
     zIndex: '1',
-});
+})
 
 export const Modal = (props, ...children) => {
-    const { 
-        isOpen, 
-        onClose, 
-        darkMode = true, 
-        style, 
+    const {
+        isOpen,
+        onClose,
+        darkMode = true,
+        style,
         closeFromOutside = true,
-        ...rest 
-    } = props || {};
+        ...rest
+    } = props || {}
 
-    if (!isOpen) return null;
+    if (!isOpen) return null
 
     // The background overlay that handles clicks
     const backgroundOverlay = Div({
         style: BackgroundOverlayStyles(darkMode),
         onClick: (e) => {
             if (closeFromOutside && onClose) {
-                onClose(e);
+                onClose(e)
             }
         }
-    });
+    })
 
     // The content card
     const content = Card.Closable({
@@ -82,12 +82,12 @@ export const Modal = (props, ...children) => {
             ...(style || {})
         },
         ...rest
-    }, ...children);
+    }, ...children)
 
     // The main container holding both
     const baseContainer = Div({
         style: BaseContainerStyles(darkMode)
-    }, backgroundOverlay, content);
+    }, backgroundOverlay, content)
 
-    return baseContainer;
-};
+    return baseContainer
+}

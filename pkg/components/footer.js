@@ -1,9 +1,9 @@
 // Helper to convert style object to string
 function styleToString(styleObj) {
     return Object.entries(styleObj || {}).map(([key, value]) => {
-        const kebabKey = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase();
-        return `${kebabKey}: ${value}`;
-    }).join('; ');
+        const kebabKey = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
+        return `${kebabKey}: ${value}`
+    }).join('; ')
 }
 
 const DefaultFooterStyling = {
@@ -18,21 +18,21 @@ const DefaultFooterStyling = {
     justifyContent: 'center',
     alignItems: 'center',
     color: 'white'
-};
+}
+
+// Alias global Footer to avoid recursion if we named it Footer
+const GlobalFooter = window.Footer
 
 export const Footer = (props, ...children) => {
-    const { style, ...rest } = props || {};
-    
+    const { style, ...rest } = props || {}
+
     const componentStyles = {
         ...DefaultFooterStyling,
         ...(style || {})
-    };
+    }
 
-    // Use global Footer wrapper
-    const GlobalFooter = window.Footer;
-    
     return GlobalFooter({
         ...rest,
         style: styleToString(componentStyles)
-    }, ...children);
-};
+    }, ...children)
+}

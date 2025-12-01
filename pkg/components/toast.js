@@ -108,7 +108,7 @@ export const Toast = {
                     darkMode,
                     onCloseClick: () => store.remove(t.id),
                     style: ToastCardStyles(t.type, darkMode, index),
-                    closeBtnStyle: t.type === 'failure' ? undefined : { borderColor: 'currentColor' }
+                    closeBtnStyle: { borderColor: t.type === 'failure' ? 'white' : 'currentColor' }
                 },
                     Typography.Paragraph({ style: { margin: 0, color: 'inherit' } }, t.message)
                 )

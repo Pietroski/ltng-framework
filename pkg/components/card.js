@@ -44,6 +44,9 @@ const CloseButtonStyles = {
 	color: 'inherit',
 }
 
+// Alias global Div to avoid recursion if we named it Div
+const GlobalDiv = window.Div
+
 export const Card = (props, ...children) => {
 	const { darkMode = true, style, ...rest } = props || {}
 
