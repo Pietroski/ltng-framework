@@ -1,0 +1,38 @@
+// Helper to convert style object to string
+function styleToString(styleObj) {
+    return Object.entries(styleObj || {}).map(([key, value]) => {
+        const kebabKey = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase();
+        return `${kebabKey}: ${value}`;
+    }).join('; ');
+}
+
+const DefaultFooterStyling = {
+    backgroundColor: 'hotpink',
+    minHeight: '250px',
+    width: '100%',
+    border: '0',
+    margin: '0',
+    padding: '0',
+    display: 'flex', // Added for better content layout by default
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    color: 'white'
+};
+
+export const Footer = (props, ...children) => {
+    const { style, ...rest } = props || {};
+    
+    const componentStyles = {
+        ...DefaultFooterStyling,
+        ...(style || {})
+    };
+
+    // Use global Footer wrapper
+    const GlobalFooter = window.Footer;
+    
+    return GlobalFooter({
+        ...rest,
+        style: styleToString(componentStyles)
+    }, ...children);
+};

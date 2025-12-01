@@ -48,6 +48,12 @@ function renderFile(filePath) {
     let match
     while ((match = scriptRegex.exec(content)) !== null) {
         const fullTag = match[0]
+        
+        // Skip module scripts in SSR as vm doesn't support them easily
+        if (fullTag.includes('type="module"')) {
+            continue
+        }
+
         const innerScript = match[1]
         const srcMatch = srcRegex.exec(fullTag)
 
@@ -107,7 +113,7 @@ function renderFile(filePath) {
 const args = process.argv.slice(2)
 const isBuild = args.includes('--build')
 const modeArg = args.find(arg => arg.startsWith('--mode='))
-const mode = modeArg ? modeArg.split('=')[1] : 'ssr' // Default to SSR
+const mode = modeArg ? modeArg.split('=')[1] : 'csr' // Default to CSR
 const portArg = args.find(arg => arg.startsWith('--port='))
 const PORT = portArg ? parseInt(portArg.split('=')[1], 10) : 3000
 const srcArg = args.find(arg => arg.startsWith('--src='))
