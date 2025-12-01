@@ -7,13 +7,13 @@ function styleToString(styleObj) {
 }
 
 const Colours = {
-	HotPink: 'hotpink',
+	Primary: '#1976d2',
 	Whitesmoke: 'whitesmoke',
 	DarkGray: '#333',
 }
 
-const InputDivStyles = (darkMode) => ({
-	border: '3px solid hotpink', // Thicker border
+const DefaultInputStyles = (darkMode) => ({
+	border: `3px solid ${Colours.Primary}`, // Thicker border
 	borderRadius: '10px',
 	margin: '5px 5px 5px 5px', // Increased top margin for floating label
 
@@ -130,7 +130,7 @@ export const Input = (props) => {
 
 	return Div({
 		style: styleToString({
-			...InputDivStyles(darkMode),
+			...DefaultInputStyles(darkMode),
 			...(style || {})
 		})
 	}, ...children)

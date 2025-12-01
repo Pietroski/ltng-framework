@@ -13,7 +13,7 @@ const Colours = {
     DarkGray: '#333',
     MediumDarkerGray: '#444',
     Whitesmoke: 'whitesmoke',
-    HotPink: 'hotpink',
+    Primary: '#1976d2',
 };
 
 // Base container that covers the screen and centers content

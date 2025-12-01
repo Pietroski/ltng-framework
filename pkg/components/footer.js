@@ -7,7 +7,7 @@ function styleToString(styleObj) {
 }
 
 const DefaultFooterStyling = {
-    backgroundColor: 'hotpink',
+    backgroundColor: '#1976d2',
     minHeight: '250px',
     width: '100%',
     border: '0',

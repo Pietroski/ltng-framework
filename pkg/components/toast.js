@@ -15,7 +15,7 @@ const Colours = {
     DarkGreen: '#006400',
     DarkRed: '#8b0000',
     Whitesmoke: 'whitesmoke',
-    HotPink: 'hotpink',
+    Primary: '#1976d2',
     DarkGray: '#333',
 }
 
@@ -76,11 +76,11 @@ const ToastCardStyles = (type, darkMode, index) => {
 
     switch (type) {
         case 'warning':
-            return { ...base, backgroundColor: Colours.Whitesmoke, color: Colours.HotPink, border: `1px solid ${Colours.HotPink}` }
+            return { ...base, backgroundColor: Colours.Whitesmoke, color: Colours.Primary, border: `1px solid ${Colours.Primary}` }
         case 'success':
-            return { ...base, backgroundColor: Colours.HotPink }
+            return { ...base, backgroundColor: Colours.Primary, border: 'none' }
         case 'failure':
-            return { ...base, backgroundColor: Colours.DarkRed }
+            return { ...base, backgroundColor: Colours.DarkRed, border: 'none' }
         default:
             return { ...base, backgroundColor: darkMode ? Colours.DarkGray : Colours.Whitesmoke, color: darkMode ? 'white' : 'black' }
     }

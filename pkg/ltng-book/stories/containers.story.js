@@ -6,7 +6,7 @@ registerStory('Containers', 'Div, Div.Flex, and Div.Grid components.', () => {
     const boxStyle = {
         width: '50px',
         height: '50px',
-        backgroundColor: 'hotpink',
+        backgroundColor: '#1976d2',
         border: '1px solid white',
         display: 'flex',
         justifyContent: 'center',

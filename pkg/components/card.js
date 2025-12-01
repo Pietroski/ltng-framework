@@ -7,7 +7,7 @@ function styleToString(styleObj) {
 }
 
 const Colours = {
-	HotPink: 'hotpink',
+	Primary: '#1976d2',
 	Whitesmoke: 'whitesmoke',
 	DarkGray: '#333',
 }
@@ -17,7 +17,7 @@ const DefaultCardStyles = (darkMode) => ({
 	height: '150px',
 	position: 'relative',
 	borderRadius: '15px',
-	border: `5px solid ${Colours.HotPink}`,
+	border: `1px solid ${Colours.Primary}`,
 	boxSizing: 'border-box',
 	backgroundColor: darkMode ? Colours.Whitesmoke : Colours.DarkGray,
 	color: darkMode ? 'black' : 'white',
@@ -34,7 +34,7 @@ const CloseButtonStyles = {
 	top: 0,
 	right: 0,
 	borderRadius: '15px',
-	border: `5px solid ${Colours.HotPink}`,
+	border: `1px solid ${Colours.Primary}`,
 	boxSizing: 'border-box',
 	display: 'flex',
 	justifyContent: 'center',

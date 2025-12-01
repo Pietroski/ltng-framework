@@ -18,15 +18,17 @@ const BaseStyles = {
 
 const PrimaryStyles = {
     ...BaseStyles,
-    backgroundColor: 'hotpink',
+    backgroundColor: '#1976d2',
     color: 'white',
+    border: 'none',
+    cursor: 'pointer',
 }
 
 const SecondaryStyles = {
     ...BaseStyles,
-    backgroundColor: 'whitesmoke',
-    color: 'hotpink',
-    borderColor: 'hotpink',
+    backgroundColor: 'transparent',
+    color: '#1976d2',
+    border: '1px solid #1976d2',
 }
 
 const DisabledStyles = {

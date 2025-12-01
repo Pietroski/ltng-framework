@@ -25,6 +25,13 @@ registerStory('Input', 'Input component with floating label and password toggle.
                 darkMode: true, 
                 placeholder: 'Password'
             })
+        ),
+        Div({},
+            H3({}, 'Secret (Password) (Light Mode)'),
+            Input.Secret({ 
+                darkMode: false, 
+                placeholder: 'Password'
+            })
         )
     );
 });
