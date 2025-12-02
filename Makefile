@@ -1,7 +1,10 @@
 # Main Makefile
 
-test-pkg:
-	node pkg/verify.test.js
+check-ltng-testingtools:
+	node ltng-testingtools/verify.test.js
+
+test-ltng-tools:
+	node ltng-tools/verify.test.js
 
 pv ?= 001 # playground_version
 port ?= 3000
