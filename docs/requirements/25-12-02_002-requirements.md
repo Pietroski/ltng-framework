@@ -27,3 +27,17 @@ Also, our minifier and compiler would need to be able to handle more robust impo
 ```javascript
 import { Div as LTNGDiv, Button as LTNGButton } from "ltng-components";
 ```
+
+# Validation phase
+
+Now, let's build a very nice application under playground/004 to test if that worked as desired! Let's use the Full library version ltng-framework-full.min.js for that purpose.
+
+Make sure you get acquainted to the full library itself so you know all the details to make the most out of the application.
+
+PS.
+
+The thing is that you don't want to double export things. You scan for the things that are exportable and it's dependencies so they are available for the parent in the minified result.
+
+Also... our ltng-book, we need to make that into an app, so we can import that into our projects give it a stories list as we did in our lib and it can figure out the rest. We are almost there... We need to make it a bit more dynamic, just it. 
+
+Test files, `*.test.js` should be skipeed from minification.

@@ -133,6 +133,24 @@ class Document {
         }
         return null
     }
+
+    getElementById(id) {
+        const find = (node) => {
+            if (node.attributes && node.attributes['id'] === id) return node
+            if (node.childNodes) {
+                for (const child of node.childNodes) {
+                    const found = find(child)
+                    if (found) return found
+                }
+            }
+            return null
+        }
+        
+        const inBody = find(this.body)
+        if (inBody) return inBody
+        const inHead = find(this.head)
+        return inHead
+    }
 }
 
 // Mock Window

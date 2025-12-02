@@ -47,6 +47,22 @@ function renderFile(filePath) {
 	const srcRegex = /src=["'](.*?)["']/
     const typeRegex = /type=["'](.*?)["']/
 
+    // Populate mock DOM body with original content so scripts can find elements (like #root)
+    const bodyRegex = /<body\b[^>]*>([\s\S]*?)<\/body>/i
+    const bodyMatch = bodyRegex.exec(content)
+    if (bodyMatch) {
+        // We need to strip scripts from the body content before setting it to innerHTML
+        // otherwise they might be executed twice or cause issues?
+        // actually, mockDom doesn't support innerHTML parsing.
+        // So we manually create the root element if we find it.
+        const bodyInner = bodyMatch[1];
+        if (bodyInner.includes('id="root"') || bodyInner.includes("id='root'")) {
+            const root = document.createElement('div');
+            root.setAttribute('id', 'root');
+            document.body.appendChild(root);
+        }
+    }
+
     // 4.1 Parse Import Map
     let importMap = {}
     let mapMatch
@@ -223,28 +239,18 @@ function renderFile(filePath) {
 				    console.error('Error running inline script:', e)
 			    }
             }
-		}
-	}
+            }
+        }
 
 	// 5. Serialize
 	// We inject the rendered body content back into the HTML
-	// Naive injection: replace <body>...</body> or append to body if empty in source
-	// Actually, our mock DOM only populated `document.body`.
-	// We should replace the content inside <body> tag in the original HTML with our rendered HTML.
-
-	// mockDom.document.body.toString() returns <body>...</body>
-	// We want just the inner content usually, but since we are replacing the whole body...
-
-	// Let's just replace the <body> tag in the source with the rendered body tag.
-	const bodyRegex = /<body\b[^>]*>([\s\S]*?)<\/body>/i
-
-	// We need to preserve the scripts that were in the body!
-	// Extract them from the original body content
-	const bodyMatch = bodyRegex.exec(content)
+    // We need to preserve the scripts that were in the body!
+    // They were stripped when we populated mockDom, but we want them in the final output.
+    // We can re-extract them from the original content.
+    
 	let scripts = ''
 	if (bodyMatch) {
 		const innerBody = bodyMatch[1]
-		const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gmi
 		let match
 		while ((match = scriptRegex.exec(innerBody)) !== null) {
 			scripts += match[0] + '\n'
@@ -394,21 +400,31 @@ if (isBuild) {
                         // Recursively scan JS files for dependencies
                         if (srcPath.endsWith('.js') || srcPath.endsWith('.mjs')) {
                             const jsContent = fs.readFileSync(srcPath, 'utf8')
+                            
+                            // Scan for imports
                             const importRegex = /(?:import|export)\s+(?:[\s\S]*?)\s+from\s+['"](.*?)['"]|import\s+['"](.*?)['"]/g
                             let match
                             while ((match = importRegex.exec(jsContent)) !== null) {
                                 const importPath = match[1] || match[2]
                                 if (importPath && !importPath.startsWith('http')) {
-                                    // Resolve import relative to the current assetPath
                                     const assetDir = path.dirname(assetPath)
                                     const resolvedImport = path.join(assetDir, importPath)
-                                    
-                                    // Normalize path separators if needed (Windows) but we are on Mac
-                                    // Add to Set. If already present, it won't be added again.
-                                    // However, modifying Set during iteration:
-                                    // "If a value is added to the Set object while iterating over it, that value will be visited by the iterator."
-                                    // So this works for recursion.
                                     assetsToCopy.add(resolvedImport)
+                                }
+                            }
+
+                            // Scan for loadCSS calls
+                            // Matches: window.loadCSS('path') or loadCSS('path')
+                            const loadCssRegex = /loadCSS\(['"](.*?)['"]\)/g
+                            while ((match = loadCssRegex.exec(jsContent)) !== null) {
+                                const cssPath = match[1]
+                                if (cssPath && !cssPath.startsWith('http')) {
+                                    // CSS paths in loadCSS are usually absolute from root (e.g. /pkg/...)
+                                    // or relative.
+                                    // If it starts with /, treat as absolute from project root.
+                                    // If relative, treat relative to the JS file? 
+                                    // Usually loadCSS('/pkg/...') is used.
+                                    assetsToCopy.add(cssPath)
                                 }
                             }
                         }

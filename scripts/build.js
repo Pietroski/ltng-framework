@@ -32,16 +32,24 @@ function minify(code) {
 // Helper to transform ES modules to global assignments
 function transformModule(code, filename) {
     let transformed = code;
+    // Handle spread require(...)
+    // e.g. ...require('./foo') -> ...{} (or remove it)
+    // Since we assume exports are already on window, we don't need to re-export them if they are just aggregators.
+    // But if we remove it, we might break object structure if it expects properties.
+    // However, if the child module put its exports on window, they are global.
+    // The parent module trying to re-export them as its own properties is redundant for the "everything is global" strategy.
+    // So we can replace `...require(...)` with nothing (empty string) if it's in an object literal?
+    // Or better, replace `require(...)` with `{}` when it's being spread?
+    // No, `...{}` is valid.
+    transformed = transformed.replace(/\.\.\.require\s*\(\s*['"].*?['"]\s*\)/g, '');
 
-    // Handle CommonJS module.exports
-    if (transformed.includes('module.exports')) {
-         return `(function() {
-            const module = { exports: {} };
-            const exports = module.exports;
-            ${transformed}
-            Object.assign(window, module.exports);
-         })();`;
-    }
+    // Handle CommonJS require(...)
+    // We assume that required modules have already been loaded and their exports are on window.
+    // So const { foo } = require('./bar') becomes const { foo } = window;
+    // And const bar = require('./bar') becomes const bar = window;
+    // This is a naive assumption that everything is flattened on window.
+    // We use a slightly more permissive regex to catch variations.
+    transformed = transformed.replace(/require\s*\(\s*['"].*?['"]\s*\)/g, 'window');
 
     // Handle imports with aliases and assignments
     // Regex to find: import { ... } from '...'
@@ -59,11 +67,6 @@ function transformModule(code, filename) {
                 const [original, alias] = part.split(' as ').map(s => s.trim());
                 return `const ${alias} = window.${original};`;
             } else {
-                // For simple imports like "import { Button }", we can either:
-                // 1. Do nothing (rely on global window.Button)
-                // 2. Create a local const (const Button = window.Button)
-                // Creating a local const is safer and supports the case where the global might be shadowed?
-                // But mostly it ensures that if the code uses 'Button', it gets it.
                 return `const ${part} = window.${part};`;
             }
         }).filter(Boolean).join('\n');
@@ -73,16 +76,49 @@ function transformModule(code, filename) {
 
     // Remove any remaining side-effect imports (e.g. import './style.css')
     transformed = transformed.replace(/import\s+['"].*?['"]/g, '');
+
+    // Handle CommonJS module.exports
+    if (transformed.includes('module.exports')) {
+         return `(function() {
+            const module = { exports: {} };
+            const exports = module.exports;
+            ${transformed}
+            // Safe assignment to window to avoid errors with read-only properties (window, document, etc.)
+            const safeAssign = (target, source) => {
+                for (const key in source) {
+                    try {
+                        target[key] = source[key];
+                    } catch (e) {
+                        // Ignore errors for read-only properties
+                    }
+                }
+            };
+            safeAssign(window, module.exports);
+         })();`;
+    }
     
     // Transform exports
     // export const Button = ... -> window.Button = ...
-    transformed = transformed.replace(/export const (\w+)/g, 'window.$1');
+    transformed = transformed.replace(/export\s+const\s+(\w+)/g, 'window.$1');
     
     // export function Button... -> window.Button = function Button...
-    transformed = transformed.replace(/export function (\w+)/g, 'window.$1 = function $1');
+    transformed = transformed.replace(/export\s+function\s+(\w+)/g, 'window.$1 = function $1');
+
+    // export class Button... -> window.Button = class Button...
+    transformed = transformed.replace(/export\s+class\s+(\w+)/g, 'window.$1 = class $1');
+
+    // export default ... -> window.default = ... (or ignore if not needed globally)
+    // For now, let's map it to window.defaultExport_<filename> to avoid collisions?
+    // Or just window.default if we assume single entry? No, this is a bundle.
+    // Let's just strip export default for now as it might be causing the syntax error if not handled.
+    // Or better: window.default = ...
+    transformed = transformed.replace(/export\s+default\s+/g, 'window.default = ');
 
     // Remove "export * from ..." lines (aggregators)
-    transformed = transformed.replace(/export \* from .*/g, '');
+    transformed = transformed.replace(/export\s+\*\s+from.*/g, '');
+
+    // Remove named exports like "export { foo, bar }"
+    transformed = transformed.replace(/export\s+\{([\s\S]*?)\}/g, '');
 
     // Wrap in IIFE
     return `(function() {
@@ -100,8 +136,10 @@ function getJsFilesRecursively(dir) {
         const filePath = path.join(dir, file);
         const stat = fs.statSync(filePath);
         if (stat && stat.isDirectory()) {
+            // Skip ltng-book for now as requested
+            if (file === 'ltng-book') return;
             results = results.concat(getJsFilesRecursively(filePath));
-        } else if (file.endsWith('.js') && file !== 'index.js') {
+        } else if (file.endsWith('.js') && !file.endsWith('.test.js')) {
             results.push(filePath);
         }
     });
@@ -136,8 +174,20 @@ function sortFiles(files) {
         // Priority 1: registry.js (must be first)
         if (baseA === 'registry.js') return -1;
         if (baseB === 'registry.js') return 1;
+
+        // Priority 2: Testing Tools (must be before pkg tests)
+        const isTestingA = a.includes('/testingtools/');
+        const isTestingB = b.includes('/testingtools/');
+        if (isTestingA && !isTestingB) return -1;
+        if (!isTestingA && isTestingB) return 1;
+
+        // Priority 3: Tools (must be before other pkg modules that use them)
+        const isToolsA = a.includes('/pkg/tools/');
+        const isToolsB = b.includes('/pkg/tools/');
+        if (isToolsA && !isToolsB) return -1;
+        if (!isToolsA && isToolsB) return 1;
         
-        // Priority 2: Stories (must be before app.js)
+        // Priority 3: Stories (must be before app.js)
         const isStoryA = baseA.endsWith('.story.js');
         const isStoryB = baseB.endsWith('.story.js');
         if (isStoryA && !isStoryB) return -1; // Stories come earlier
@@ -176,10 +226,10 @@ async function build() {
             name: 'ltng-framework-with-testing-components.min.js',
             files: [...coreFiles, ...testingFiles, ...componentFiles]
         },
-        {
-            name: 'ltng-framework-with-testing-book.min.js',
-            files: [...coreFiles, ...testingFiles, ...componentFiles, ...bookFiles]
-        },
+        // {
+        //     name: 'ltng-framework-with-testing-book.min.js',
+        //     files: [...coreFiles, ...testingFiles, ...componentFiles, ...bookFiles]
+        // },
         {
             name: 'ltng-framework-full.min.js',
             files: [...coreFiles, ...testingFiles, ...allPkgFiles]
