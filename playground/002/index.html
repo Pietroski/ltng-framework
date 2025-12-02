@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>ltng-framework Test</title>
 	<script src="../../ltng-framework.js"></script>
-	<script src="theme.js"></script>
+	<script src="./theme.js"></script>
 	<style>
 		body {
 			font-family: sans-serif;
@@ -72,7 +72,7 @@
 					)
 				),
 				footer({ style: 'margin-top: 20px; color: #666;' },
-					P({}, '© 2025 ltng-framework')
+					p({}, '© 2025 ltng-framework')
 				)
 			)
 		)
@@ -109,7 +109,7 @@
 			p({}, 'Reload the page to see the theme persist!'),
 			themeBtn,
 			LTNGDiv({ style: 'margin-top: 15px;' },
-				A({ href: 'page2.html', style: 'color: #007bff;' }, 'Go to Page 2 (Context Test)')
+				a({ href: 'page2.html', style: 'color: #007bff;' }, 'Go to Page 2 (Context Test)')
 			)
 		)
 

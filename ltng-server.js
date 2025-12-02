@@ -323,39 +323,108 @@ if (isBuild) {
 
 			let html = renderFile(filePath)
 
-            // Rewrite asset paths to be flat in dist
-            referencedScripts.forEach(scriptPath => {
-                const fileName = path.basename(scriptPath)
-                // Simple string replacement for now. 
-                // In a robust system we'd parse HTML, but here we just replace the src string.
-                // We use split/join to replace all occurrences.
-                html = html.split(scriptPath).join(fileName)
-            })
+			// 6. Scan rendered HTML for assets to copy
+			// We look for <script src="...">, <link href="..."> and importmaps
+			const assetsToCopy = new Set()
+
+			// Scripts and Links in Rendered HTML
+			const assetRegex = /<(?:script|link)\b[^>]*?(?:src|href)=["'](.*?)["'][^>]*>/gmi
+			while ((match = assetRegex.exec(html)) !== null) {
+				assetsToCopy.add(match[1])
+			}
+
+			// Import Maps
+			const mapRegex = /<script\b[^>]*type=["']importmap["'][^>]*>([\s\S]*?)<\/script>/gmi
+			while ((match = mapRegex.exec(content)) !== null) {
+				try {
+					const map = JSON.parse(match[1])
+					if (map.imports) {
+						Object.values(map.imports).forEach(path => assetsToCopy.add(path))
+					}
+				} catch (e) {
+					console.error('Failed to parse import map during build', e)
+				}
+			}
+
+			// Copy Assets
+			for (const assetPath of assetsToCopy) {
+				try {
+					let srcPath
+					let destPath
+
+					if (assetPath.startsWith('/')) {
+						// Absolute path from project root (e.g. /pkg/...)
+						srcPath = path.join(process.cwd(), assetPath)
+						destPath = path.join(DIST_DIR, assetPath)
+					} else {
+						// Relative path
+						srcPath = path.resolve(SRC_DIR, assetPath)
+						
+						// Determine destination based on whether it's inside SRC_DIR or not
+						if (srcPath.startsWith(path.resolve(SRC_DIR))) {
+							// Inside SRC_DIR: keep relative structure from SRC_DIR
+							const relToSrc = path.relative(SRC_DIR, srcPath)
+							destPath = path.join(DIST_DIR, relToSrc)
+						} else {
+							// Outside SRC_DIR (e.g. ../../pkg/...): mirror project structure inside DIST_DIR
+							// This assumes the browser resolves ../../ to root /
+							const relToProject = path.relative(process.cwd(), srcPath)
+							destPath = path.join(DIST_DIR, relToProject)
+						}
+					}
+
+					if (fs.existsSync(srcPath)) {
+						const destDir = path.dirname(destPath)
+						if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true })
+						
+						// Only copy if source and dest are different
+						if (srcPath !== destPath) {
+							// Check if file already exists to avoid infinite loops or redundant copies
+							// But we need to allow overwriting if needed, or just skip.
+							// For scanning dependencies, we must process even if copied? 
+							// No, if we already processed this assetPath, we shouldn't do it again.
+							// But assetsToCopy is a Set, so we iterate unique items.
+							
+							if (!fs.existsSync(destPath)) {
+                                fs.copyFileSync(srcPath, destPath)
+							    console.log(`Copied asset: ${assetPath}`)
+                            }
+						}
+
+                        // Recursively scan JS files for dependencies
+                        if (srcPath.endsWith('.js') || srcPath.endsWith('.mjs')) {
+                            const jsContent = fs.readFileSync(srcPath, 'utf8')
+                            const importRegex = /(?:import|export)\s+(?:[\s\S]*?)\s+from\s+['"](.*?)['"]|import\s+['"](.*?)['"]/g
+                            let match
+                            while ((match = importRegex.exec(jsContent)) !== null) {
+                                const importPath = match[1] || match[2]
+                                if (importPath && !importPath.startsWith('http')) {
+                                    // Resolve import relative to the current assetPath
+                                    const assetDir = path.dirname(assetPath)
+                                    const resolvedImport = path.join(assetDir, importPath)
+                                    
+                                    // Normalize path separators if needed (Windows) but we are on Mac
+                                    // Add to Set. If already present, it won't be added again.
+                                    // However, modifying Set during iteration:
+                                    // "If a value is added to the Set object while iterating over it, that value will be visited by the iterator."
+                                    // So this works for recursion.
+                                    assetsToCopy.add(resolvedImport)
+                                }
+                            }
+                        }
+
+					} else {
+						// console.warn(`Asset not found: ${srcPath}`)
+					}
+				} catch (e) {
+					console.error(`Error copying asset ${assetPath}:`, e)
+				}
+			}
 
 			fs.writeFileSync(path.join(DIST_DIR, file), html)
 			console.log(`Saved ${file}`)
 		} catch (e) {
 			console.error(`Failed to render ${file}:`, e)
-		}
-	})
-
-	// Copy only referenced assets (JS, CSS)
-	referencedScripts.forEach(file => {
-		const filePath = path.join(SRC_DIR, file)
-		if (fs.existsSync(filePath)) {
-			// Flatten structure: copy all assets to root of dist
-			const fileName = path.basename(file)
-			const destPath = path.join(DIST_DIR, fileName)
-            
-            // Ensure we don't overwrite if multiple files have same name (naive check)
-            if (fs.existsSync(destPath)) {
-                console.log(`Asset ${fileName} already exists in dist, skipping copy.`)
-            } else {
-			    fs.copyFileSync(filePath, destPath)
-			    console.log(`Copied referenced asset: ${file} -> ${fileName}`)
-            }
-		} else {
-			console.warn(`Warning: Referenced asset ${file} not found at ${filePath}`)
 		}
 	})
 
