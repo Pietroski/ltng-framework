@@ -19,9 +19,11 @@ export const Footer = (props, ...children) => {
     const classes = ['ltng-footer']
     if (className) classes.push(className)
 
-	return GlobalFooter({
+    const footerProps = {
 		...rest,
-		class: classes.join(' '),
-        style: typeof style === 'object' ? styleToString(style) : style
-	}, ...children)
+		class: classes.join(' ')
+	}
+    if (style) footerProps.style = typeof style === 'object' ? styleToString(style) : style
+
+	return GlobalFooter(footerProps, ...children)
 }

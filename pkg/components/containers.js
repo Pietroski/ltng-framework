@@ -50,11 +50,13 @@ export const Div = (props, ...children) => {
     const classes = ['ltng-container']
     if (className) classes.push(className)
 
-	return GlobalDiv({
+    const containerProps = {
 		...rest,
-		class: classes.join(' '),
-        style: typeof style === 'object' ? styleToString(style) : style
-	}, ...children)
+		class: classes.join(' ')
+	}
+    if (style) containerProps.style = typeof style === 'object' ? styleToString(style) : style
+
+	return GlobalDiv(containerProps, ...children)
 }
 
 Div.Flex = (props, ...children) => {
@@ -63,11 +65,13 @@ Div.Flex = (props, ...children) => {
     const classes = ['ltng-container', 'ltng-container--flex']
     if (className) classes.push(className)
 
-	return GlobalDiv({
+    const containerProps = {
 		...rest,
-		class: classes.join(' '),
-        style: typeof style === 'object' ? styleToString(style) : style
-	}, ...children)
+		class: classes.join(' ')
+	}
+    if (style) containerProps.style = typeof style === 'object' ? styleToString(style) : style
+
+	return GlobalDiv(containerProps, ...children)
 }
 
 Div.Grid = (props, ...children) => {
@@ -76,9 +80,11 @@ Div.Grid = (props, ...children) => {
     const classes = ['ltng-container', 'ltng-container--grid']
     if (className) classes.push(className)
 
-	return GlobalDiv({
+    const containerProps = {
 		...rest,
-		class: classes.join(' '),
-        style: typeof style === 'object' ? styleToString(style) : style
-	}, ...children)
+		class: classes.join(' ')
+	}
+    if (style) containerProps.style = typeof style === 'object' ? styleToString(style) : style
+
+	return GlobalDiv(containerProps, ...children)
 }

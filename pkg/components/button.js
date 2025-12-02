@@ -34,9 +34,9 @@ export const Button = (props, ...children) => {
 
 	const buttonProps = {
 		...rest,
-		class: classes.join(' '),
-        style: styleToString(style) // Pass through inline styles
+		class: classes.join(' ')
 	}
+    if (style) buttonProps.style = typeof style === 'object' ? styleToString(style) : style // Pass through inline styles
 
 	if (disabled) {
 		buttonProps.disabled = true

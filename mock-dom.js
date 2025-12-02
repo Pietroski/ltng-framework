@@ -123,6 +123,16 @@ class Document {
 	createTextNode(text) {
 		return new TextNode(text)
 	}
+
+    querySelector(selector) {
+        // Very basic selector support for loadCSS: link[href="..."]
+        // We only check head children for now as that's where links go
+        if (selector.startsWith('link[href=')) {
+            const href = selector.match(/href=["'](.*?)["']/)[1]
+            return this.head.childNodes.find(node => node.tagName === 'link' && node.attributes['href'] === href) || null
+        }
+        return null
+    }
 }
 
 // Mock Window
