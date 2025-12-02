@@ -16,8 +16,8 @@ playground-ssg:
 	node ltng-server.js --src=playground/$(pv) --dist=dist/playground/$(pv) --build
 	node ltng-server.js --src=playground/$(pv) --dist=dist/playground/$(pv) --port=$(port) --mode=ssg
 
-build-pkg:
-	node ltng-server.js --src=pkg/ltng-book --dist=dist/ltng-book --build
+build:
+	node scripts/build.js
 
 ltng-book:
 	node ltng-server.js --src=pkg/ltng-book --dist=dist/ltng-book --port=$(port) --mode=csr
