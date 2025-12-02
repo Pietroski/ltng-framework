@@ -4,46 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LTNG Task Manager</title>
+    <!-- Import Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- Import the minified framework -->
     <script src="../../dist/ltng-framework.min.js"></script>
+    
     <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-secondary: #64748b;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --border-radius: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 40px 20px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
         }
-        .task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 20px;
+
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
         }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .task-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            animation: fadeIn 0.3s ease-out;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
         }
-        .task-actions {
-            display: flex;
-            gap: 10px;
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            border-color: #e2e8f0;
         }
-        .completed {
+
+        .completed-text {
             text-decoration: line-through;
-            color: #888;
+            color: var(--text-secondary);
+        }
+
+        /* Overriding Framework Styles for Premium Look */
+        .ltng-button {
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .ltng-button:active {
+            transform: scale(0.98);
+        }
+
+        .ltng-card {
+            border: none !important;
+            box-shadow: var(--shadow) !important;
+            border-radius: var(--border-radius) !important;
+        }
+
+        .ltng-input-field {
+            border-radius: 8px !important;
+            border: 1px solid #e2e8f0 !important;
+            padding: 12px !important;
+            transition: border-color 0.2s;
+        }
+        .ltng-input-field:focus {
+            border-color: var(--primary) !important;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
     </style>
 </head>
 <body>
     <script>
         // Initialize Store
-        // We use createFormStore because the Form component requires specific methods (GetFormState, etc.)
         const store = createFormStore({
             tasks: [
-                { id: 1, title: 'Check out LTNG Framework', completed: true },
-                { id: 2, title: 'Build a cool app', completed: false }
+                { id: 1, title: 'Review Pull Request', completed: true },
+                { id: 2, title: 'Design System Update', completed: false },
+                { id: 3, title: 'Client Meeting', completed: false }
             ],
-            form: {} // For Form component
+            form: {},
+            modalOpen: false,
+            taskToDelete: null
         });
 
         // Actions
@@ -54,7 +128,7 @@
                 title,
                 completed: false
             };
-            store.setState({ tasks: [...state.tasks, newTask] });
+            store.setState({ tasks: [newTask, ...state.tasks] }); // Add to top
             Toast.success('Task added successfully!');
         };
 
@@ -66,100 +140,169 @@
             store.setState({ tasks: updatedTasks });
         };
 
-        const deleteTask = (id) => {
-            // Confirm with Modal
+        const confirmDelete = (id) => {
             store.setState({ modalOpen: true, taskToDelete: id });
         };
-        
-        const App = () => {
-            const container = Div({ class: 'app-container', style: 'max-width: 600px; margin: 0 auto;' });
 
-            const render = (state) => {
-                container.innerHTML = '';
+        const executeDelete = () => {
+            const s = store.getState();
+            if (s.taskToDelete) {
+                const filtered = s.tasks.filter(t => t.id !== s.taskToDelete);
+                store.setState({ tasks: filtered, modalOpen: false, taskToDelete: null });
+                Toast.success('Task deleted.');
+            }
+        };
 
-                // Header
-                container.appendChild(Typography.H1({ style: 'text-align: center; color: #333;' }, 'LTNG Task Manager'));
+        const cancelDelete = () => {
+            store.setState({ modalOpen: false, taskToDelete: null });
+        };
 
-                // Add Task Form
-                const form = Form({
+        // Components
+        const Header = () => Div({ style: 'margin-bottom: 30px; text-align: center;' },
+            Typography.H1({ 
+                style: 'font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;' 
+            }, 'Task Master'),
+            Typography.Paragraph({ style: 'color: var(--text-secondary); margin-top: 8px;' }, 'Manage your daily goals with style')
+        );
+
+        const TaskForm = () => {
+            return Card({ style: 'padding: 24px; margin-bottom: 30px; background: white;' },
+                Form({
                     store,
+                    style: 'display: flex; gap: 12px; align-items: flex-start;',
                     onSubmit: (values) => {
-                        // The Form component passes { ...event, formObject }
-                        // We need the value from the field.
-                        // The fieldKey is 'taskTitle'.
-                        // values.formObject['taskTitle'].value
                         const title = values.formObject['taskTitle'].value;
                         if (title) {
                             addTask(title);
-                            // Reset form field
                             store.SetFormItemState({ id: 'taskTitle', value: '', required: true }); 
                         }
                     }
                 },
-                    Form.Field({
-                        store,
-                        fieldKey: 'taskTitle',
-                        label: 'New Task Title',
-                        isRequired: true
-                    }),
-                    Form.PrimaryButton({ store, style: 'width: 100%; margin-top: 10px;' }, 'Add Task')
+                    Div({ style: 'flex-grow: 1;' },
+                        Form.Field({
+                            store,
+                            fieldKey: 'taskTitle',
+                            label: 'What needs to be done?',
+                            isRequired: true,
+                            style: 'width: 100%;',
+                            darkMode: false // Light theme inputs
+                        })
+                    ),
+                    Form.PrimaryButton({ 
+                        store, 
+                        style: 'background: var(--primary); padding: 12px 24px; height: 46px; margin-top: 1px; border-radius: 8px; font-weight: 600;' 
+                    }, 'Add')
+                )
+            );
+        };
+
+        const TaskList = (tasks) => {
+            const list = Div({ class: 'task-list', style: 'display: flex; flex-direction: column; gap: 16px;' });
+            
+            if (tasks.length === 0) {
+                list.appendChild(
+                    Div({ style: 'text-align: center; padding: 40px; color: var(--text-secondary);' },
+                        Typography.H3({ style: 'margin-bottom: 8px;' }, 'All caught up!'),
+                        Typography.Paragraph({}, 'No tasks on your list. Enjoy your day!')
+                    )
                 );
-                
-                container.appendChild(Card({ style: 'padding: 20px; margin-bottom: 20px;' }, form));
-
-                // Task List
-                const list = Div({ class: 'task-list' });
-                if (state.tasks.length === 0) {
-                    list.appendChild(Typography.Paragraph({ style: 'text-align: center; color: #666;' }, 'No tasks yet. Add one above!'));
-                } else {
-                    state.tasks.forEach(task => {
-                        const taskCard = Card({ class: 'task-item', style: 'padding: 15px;' },
-                            Div({ 
-                                class: task.completed ? 'completed' : '',
-                                style: 'flex-grow: 1; cursor: pointer;',
-                                onClick: () => toggleTask(task.id)
-                            }, task.title),
-                            Div({ class: 'task-actions' },
-                                Button.Secondary({ 
-                                    onClick: () => toggleTask(task.id),
-                                    style: 'padding: 5px 10px; font-size: 0.8em;'
-                                }, task.completed ? 'Undo' : 'Done'),
-                                Button({ 
-                                    style: 'padding: 5px 10px; font-size: 0.8em; background-color: #ff4444; color: white; border: none;',
-                                    onClick: () => deleteTask(task.id)
-                                }, 'Delete')
-                            )
-                        );
-                        list.appendChild(taskCard);
-                    });
-                }
-                container.appendChild(list);
-
-                // Modal
-                if (state.modalOpen) {
-                    const modal = Modal({
-                        isOpen: true,
-                        onClose: () => store.setState({ modalOpen: false, taskToDelete: null })
+            } else {
+                tasks.forEach(task => {
+                    const taskCard = Card({ 
+                        class: 'task-item', 
+                        style: 'padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; background: white;' 
                     },
-                        Typography.H3({}, 'Confirm Delete'),
-                        Typography.Paragraph({}, 'Are you sure you want to delete this task? This action cannot be undone.'),
-                        Div({ style: 'display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;' },
-                            Button.Secondary({ onClick: () => store.setState({ modalOpen: false, taskToDelete: null }) }, 'Cancel'),
-                            Button.Primary({ 
-                                onClick: () => {
-                                    const s = store.getState();
-                                    const filtered = s.tasks.filter(t => t.id !== s.taskToDelete);
-                                    store.setState({ tasks: filtered, modalOpen: false, taskToDelete: null });
-                                    Toast.failure('Task deleted permanently.');
-                                }
-                            }, 'Delete')
+                        Div({ 
+                            style: 'display: flex; align-items: center; gap: 12px; cursor: pointer; flex-grow: 1;',
+                            onClick: () => toggleTask(task.id)
+                        },
+                            // Custom Checkbox
+                            Div({ 
+                                style: `
+                                    width: 20px; height: 20px; border-radius: 6px; 
+                                    border: 2px solid ${task.completed ? 'var(--success)' : '#cbd5e1'};
+                                    background: ${task.completed ? 'var(--success)' : 'transparent'};
+                                    display: flex; align-items: center; justify-content: center;
+                                    transition: all 0.2s;
+                                `
+                            }, task.completed ? Typography.Span({ style: 'color: white; font-size: 12px;' }, '✓') : null),
+                            
+                            Typography.Span({ 
+                                class: task.completed ? 'completed-text' : '',
+                                style: 'font-size: 1.1rem; font-weight: 500;',
+                                darkMode: false
+                            }, task.title)
+                        ),
+                        Div({ class: 'task-actions', style: 'display: flex; gap: 8px;' },
+                            Button({ 
+                                style: 'padding: 8px; color: var(--text-secondary); background: transparent; border: none; cursor: pointer; border-radius: 6px;',
+                                onClick: (e) => { e.stopPropagation(); confirmDelete(task.id); }
+                            }, 
+                            // Trash Icon (SVG)
+                            Div({ style: 'width: 20px; height: 20px;' }, 
+                                Div({ style: 'font-size: 1.2em;' }, '🗑️') 
+                            ))
                         )
                     );
-                    if (modal) container.appendChild(modal);
-                }
+                    list.appendChild(taskCard);
+                });
+            }
+            return list;
+        };
 
-                // Toast Container
-                container.appendChild(Toast.Container({ store: window.toastStore }));
+        const DeleteModal = (isOpen) => {
+            if (!isOpen) return null;
+            
+            return Modal({
+                isOpen: true,
+                onClose: cancelDelete,
+                style: 'backdrop-filter: blur(4px);'
+            },
+                Div({ style: 'text-align: center; padding: 10px;' },
+                    Div({ style: 'font-size: 3rem; margin-bottom: 16px;' }, '🗑️'),
+                    Typography.H3({ style: 'margin-bottom: 8px; color: var(--text-main);' }, 'Delete Task'),
+                    Typography.Paragraph({ style: 'color: var(--text-secondary); margin-bottom: 24px;' }, 'Are you sure you want to delete this task? This action cannot be undone.'),
+                    Div({ style: 'display: grid; grid-template-columns: 1fr 1fr; gap: 12px;' },
+                        Button.Secondary({ 
+                            onClick: cancelDelete,
+                            style: 'padding: 12px; border-radius: 8px; font-weight: 600;'
+                        }, 'Cancel'),
+                        Button({ 
+                            onClick: executeDelete,
+                            style: 'padding: 12px; border-radius: 8px; font-weight: 600; background: var(--danger); color: white; border: none; cursor: pointer;'
+                        }, 'Delete')
+                    )
+                )
+            );
+        };
+
+        const App = () => {
+            const container = Div({ class: 'app-container' });
+
+            // Static Components (rendered once)
+            container.appendChild(Header());
+            container.appendChild(TaskForm());
+
+            // Dynamic Containers
+            const taskListContainer = Div();
+            container.appendChild(taskListContainer);
+
+            const modalContainer = Div();
+            container.appendChild(modalContainer);
+
+            // Toast Container (rendered once)
+            container.appendChild(Toast.Container({ store: window.toastStore, darkMode: false }));
+
+            const render = (state) => {
+                // Update Task List
+                // Optimization: Could diff here, but clearing/rendering list is fine for now
+                taskListContainer.innerHTML = '';
+                taskListContainer.appendChild(TaskList(state.tasks));
+                
+                // Update Modal
+                modalContainer.innerHTML = '';
+                const modal = DeleteModal(state.modalOpen);
+                if (modal) modalContainer.appendChild(modal);
             };
 
             // Initial Render
@@ -173,7 +316,6 @@
 
         // Mount App
         Body.render(App());
-
 
     </script>
 </body>

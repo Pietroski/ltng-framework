@@ -194,6 +194,9 @@ Form.PrimaryButton = (props, ...children) => {
 			// Check if form is valid
 			let shouldDisable = false
 			Object.values(state).forEach(item => {
+                // Skip non-object items (like booleans, nulls, arrays) or items that don't look like fields
+                if (!item || typeof item !== 'object' || Array.isArray(item)) return
+
 				if (item.required && (!item.value || item.errValue)) {
 					shouldDisable = true
 				}
