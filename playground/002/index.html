@@ -101,7 +101,7 @@
 		// 2. Persisted Theme Store
 		const themeStore = createStore({ dark: false }, { persist: 'ltng_theme' })
 
-		const themeBtn = LTNGButton({ class: 'btn', style: 'margin-top: 10px;' }, 'Toggle Theme')
+		const themeBtn = LTNGButton.Primary({ class: 'btn', style: 'margin-top: 10px;' }, 'Toggle Theme')
 		themeStore.subscribe(setTheme)
 
 		const themeSection = LTNGDiv({ class: 'container', style: 'margin-top: 20px;' },
