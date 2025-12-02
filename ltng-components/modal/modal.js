@@ -1,4 +1,4 @@
-import { Card } from './card/card.js'
+import { Card } from '../card/card.js'
 
 // Load styles
 window.loadCSS('../styles/theme.css')

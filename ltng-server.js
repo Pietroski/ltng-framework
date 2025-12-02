@@ -133,21 +133,29 @@ function renderFile(filePath) {
         
         // 7. Remove import/export statements
         
-        const transpiled = `(function() {
-            ${scriptContent
-            // Handle export const/var/let
-            .replace(/export\s+(const|var|let)\s+(\w+)/g, '$1 $2 = window.$2')
-            // Handle export function
-            .replace(/export\s+function\s+(\w+)/g, 'window.$1 = function $1')
-            // Handle export class
-            .replace(/export\s+class\s+(\w+)/g, 'window.$1 = class $1')
-            
-            .replace(/export\s+default\s+(\w+)/g, 'window.default = $1')
-            .replace(/export\s+\{([\s\S]*?)\}/g, '') // Remove named exports
-            .replace(/(?:import|export)\s+(?:[\s\S]*?)\s+from\s+['"].*?['"]/g, '') // Remove imports/re-exports
-            .replace(/import\s+['"].*?['"]/g, '') // Remove side-effect imports
-            }
-        })()`
+        // Handle CommonJS module.exports
+        let isCommonJS = scriptContent.includes('module.exports') || scriptContent.includes('exports.')
+
+        let transpiled;
+        if (isCommonJS) {
+             transpiled = transpileCommonJS(scriptContent)
+        } else {
+            transpiled = `(function() {
+                ${scriptContent
+                // Handle export const/var/let
+                .replace(/export\s+(const|var|let)\s+(\w+)/g, '$1 $2 = window.$2')
+                // Handle export function
+                .replace(/export\s+function\s+(\w+)/g, 'window.$1 = function $1')
+                // Handle export class
+                .replace(/export\s+class\s+(\w+)/g, 'window.$1 = class $1')
+                
+                .replace(/export\s+default\s+(\w+)/g, 'window.default = $1')
+                .replace(/export\s+\{([\s\S]*?)\}/g, '') // Remove named exports
+                .replace(/(?:import|export)\s+(?:[\s\S]*?)\s+from\s+['"].*?['"]/g, '') // Remove imports/re-exports
+                .replace(/import\s+['"].*?['"]/g, '') // Remove side-effect imports
+                }
+            })()`
+        }
 
         try {
             vm.runInContext(transpiled, context)
@@ -448,6 +456,26 @@ if (isBuild) {
 	process.exit(0)
 }
 
+// Helper to transpile CommonJS to ESM-compatible IIFE
+function transpileCommonJS(scriptContent) {
+    return `(function() {
+        const module = { exports: {} };
+        const exports = module.exports;
+        ${scriptContent}
+        // Safe assignment to window
+        const safeAssign = (target, source) => {
+            for (const key in source) {
+                try {
+                    target[key] = source[key];
+                } catch (e) {
+                    // Ignore errors for read-only properties
+                }
+            }
+        };
+        safeAssign(window, module.exports);
+    })()`
+}
+
 // Server Logic
 const server = http.createServer((req, res) => {
 	let url = req.url === '/' ? '/index.html' : req.url
@@ -493,7 +521,16 @@ const server = http.createServer((req, res) => {
 			}
 		} else {
 			// Serve static files (JS, CSS)
-			const content = fs.readFileSync(filePath)
+			let content = fs.readFileSync(filePath)
+            
+            // On-the-fly transpilation for JS files in CSR mode
+            if (ext === '.js' && mode === 'csr') {
+                const textContent = content.toString('utf8')
+                if (textContent.includes('module.exports') || textContent.includes('exports.')) {
+                    content = transpileCommonJS(textContent)
+                }
+            }
+
 			const contentType = ext === '.js' ? 'text/javascript' :
 				ext === '.css' ? 'text/css' : 'text/plain'
 			res.writeHead(200, { 'Content-Type': contentType })

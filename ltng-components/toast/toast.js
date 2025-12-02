@@ -1,7 +1,7 @@
 import { styleToString } from '../../ltng-tools/converter/style.js'
-import { Card } from './card/card.js'
-import { Div } from './container/containers.js'
-import { Typography } from './typography.js'
+import { Card } from '../card/card.js'
+import { Div } from '../container/containers.js'
+import { Typography } from '../typography/typography.js'
 
 const Colours = {
 	DarkGoldenRod: '#b8860b',

@@ -1,4 +1,4 @@
-import { styleToString } from '../../ltng-tools/converter/style'
+import { styleToString } from '../../ltng-tools/converter/style.js'
 
 export const FlexStyleOpts = {
 	FD: {

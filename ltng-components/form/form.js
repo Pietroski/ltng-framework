@@ -1,8 +1,8 @@
 import { styleToString } from '../../ltng-tools/converter/style.js'
-import { Input } from './input.js'
-import { Button } from './button/button.js'
-import { Typography } from './typography.js'
-import { Div } from './container/containers.js'
+import { Input } from '../input/input.js'
+import { Button } from '../button/button.js'
+import { Typography } from '../typography/typography.js'
+import { Div } from '../container/containers.js'
 
 // Load styles
 window.loadCSS('../styles/theme.css')
