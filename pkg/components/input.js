@@ -1,72 +1,6 @@
-// Helper to convert style object to string
-function styleToString(styleObj) {
-	return Object.entries(styleObj || {}).map(([key, value]) => {
-		const kebabKey = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
-		return `${kebabKey}: ${value}`
-	}).join('; ')
-}
-
-const Colours = {
-	Primary: '#1976d2',
-	Whitesmoke: 'whitesmoke',
-	DarkGray: '#333',
-}
-
-const DefaultInputStyles = (darkMode) => ({
-	border: `3px solid ${Colours.Primary}`, // Thicker border
-	borderRadius: '10px',
-	margin: '5px 5px 5px 5px', // Increased top margin for floating label
-
-	width: '100%',
-	padding: '0 0 5px 0',
-	position: 'relative',
-	fontFamily: 'inherit', // Match component style
-	display: 'flex',
-	flexDirection: 'column',
-	backgroundColor: darkMode ? Colours.DarkGray : Colours.Whitesmoke,
-})
-
-const LabelStyles = (darkMode) => ({
-	zIndex: '2',
-	position: 'relative',
-	top: '-12px', // Adjusted for thicker border
-	left: '10px', // More indentation
-	margin: '0',
-	padding: '0 6px',
-	backgroundColor: darkMode ? Colours.DarkGray : Colours.Whitesmoke,
-	color: darkMode ? '#ffffff' : '#000000',
-	width: 'max-content',
-	height: 'auto',
-	fontSize: '14px', // Slightly smaller for a "label" look
-	fontWeight: '500', // Slightly bolder
-	fontFamily: 'inherit', // Match component style
-	lineHeight: '1.2',
-})
-
-const InputFieldStyles = (darkMode) => ({
-	height: '24px', // Slightly taller
-	maxHeight: '24px',
-	border: 'none',
-	fontSize: '16px', // Standard input size
-	fontFamily: 'inherit', // Match component style
-	backgroundColor: darkMode ? Colours.DarkGray : Colours.Whitesmoke,
-	color: darkMode ? '#ffffff' : '#000000',
-	outline: 'none',
-	padding: '0 10px', // More padding
-	width: 'calc(100% - 20px)',
-})
-
-const SecretDivStyles = (darkMode) => ({
-	zIndex: '3',
-	position: 'absolute',
-	backgroundColor: 'transparent',
-	top: '50%',
-	right: '10px',
-	transform: 'translateY(-50%)',
-	cursor: 'pointer',
-	userSelect: 'none',
-	color: darkMode ? '#ffffff' : '#000000',
-})
+// Load styles
+window.loadCSS('/pkg/styles/theme.css')
+window.loadCSS('/pkg/components/input.css')
 
 // Alias global Input to avoid recursion if we named it Input
 const GlobalInput = window.Input
@@ -83,38 +17,51 @@ export const Input = (props) => {
 		onFocus,
 		onBlur,
 		value,
+        className = '',
 		...rest
 	} = props || {}
 
 	const inputId = id || `input-${Math.random().toString(36).substring(2, 11)}`
 	let currentType = isSecret ? 'password' : type
 
+    // Input Field Classes
+    const inputClasses = ['ltng-input-field']
+    if (darkMode) inputClasses.push('ltng-input-field--dark')
+    else inputClasses.push('ltng-input-field--light')
+    if (isSecret) inputClasses.push('ltng-input-field--secret')
+
 	const inputEl = GlobalInput({
 		id: inputId,
 		type: currentType,
 		value: value || '',
 		placeholder: '', // Placeholder is handled by label
-		style: styleToString({
-			...InputFieldStyles(darkMode),
-			...(isSecret ? { width: 'calc(100% - 40px)' } : {})
-		}),
+        class: inputClasses.join(' '),
 		onInput: onChange, // Map onChange to onInput for real-time updates
 		onFocus: onFocus,
 		onBlur: onBlur,
 		...rest
 	})
 
+    // Label Classes
+    const labelClasses = ['ltng-input-label']
+    if (darkMode) labelClasses.push('ltng-input-label--dark')
+    else labelClasses.push('ltng-input-label--light')
+
 	const children = [
 		Label({
-			style: styleToString(LabelStyles(darkMode)),
+            class: labelClasses.join(' '),
 			for: inputId
 		}, placeholder || ''),
 		inputEl
 	]
 
 	if (isSecret) {
+        const toggleClasses = ['ltng-input-secret-toggle']
+        if (darkMode) toggleClasses.push('ltng-input-secret-toggle--dark')
+        else toggleClasses.push('ltng-input-secret-toggle--light')
+
 		const toggleBtn = Div({
-			style: styleToString(SecretDivStyles(darkMode)),
+            class: toggleClasses.join(' '),
 			onClick: (e) => {
 				const input = document.getElementById(inputId)
 				if (input) {
@@ -131,11 +78,15 @@ export const Input = (props) => {
 		children.push(toggleBtn)
 	}
 
+    // Wrapper Classes
+    const wrapperClasses = ['ltng-input-wrapper']
+    if (darkMode) wrapperClasses.push('ltng-input-wrapper--dark')
+    else wrapperClasses.push('ltng-input-wrapper--light')
+    if (className) wrapperClasses.push(className)
+
 	return Div({
-		style: styleToString({
-			...DefaultInputStyles(darkMode),
-			...(style || {})
-		})
+        class: wrapperClasses.join(' '),
+        style: style
 	}, ...children)
 }
 

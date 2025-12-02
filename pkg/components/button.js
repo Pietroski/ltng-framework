@@ -1,3 +1,5 @@
+const GlobalButton = window.Button
+
 // Helper to convert style object to string
 function styleToString(styleObj) {
 	return Object.entries(styleObj || {}).map(([key, value]) => {
@@ -6,63 +8,35 @@ function styleToString(styleObj) {
 	}).join('; ')
 }
 
-const BaseStyles = {
-	padding: '10px 20px',
-	border: '1px solid transparent',
-	borderRadius: '4px',
-	cursor: 'pointer',
-	fontSize: '16px',
-	fontFamily: 'inherit',
-	transition: 'background-color 0.2s, color 0.2s',
-}
-
-const PrimaryStyles = {
-	...BaseStyles,
-	backgroundColor: '#1976d2',
-	color: 'white',
-	border: 'none',
-	cursor: 'pointer',
-}
-
-const SecondaryStyles = {
-	...BaseStyles,
-	backgroundColor: 'transparent',
-	color: '#1976d2',
-	border: '1px solid #1976d2',
-}
-
-const DisabledStyles = {
-	backgroundColor: 'gray',
-	cursor: 'not-allowed',
-	color: 'white',
-}
-
-const GlobalButton = window.Button
+// Load styles
+window.loadCSS('/pkg/styles/theme.css')
+window.loadCSS('/pkg/components/button.css')
 
 export const Button = (props, ...children) => {
-	const { variant = 'default', disabled, style, ...rest } = props || {}
+	const { variant = 'default', disabled, className = '', style, ...rest } = props || {}
 
-	let componentStyles = { ...BaseStyles }
-
+	const classes = ['ltng-button']
+	
 	if (variant === 'primary') {
-		componentStyles = { ...componentStyles, ...PrimaryStyles }
+		classes.push('ltng-button--primary')
 	} else if (variant === 'secondary') {
-		componentStyles = { ...componentStyles, ...SecondaryStyles }
+		classes.push('ltng-button--secondary')
 	}
 
 	if (disabled) {
-		componentStyles = { ...componentStyles, ...DisabledStyles }
+		// We rely on :disabled pseudo-class, but can add a class if needed for non-button elements
+		// classes.push('ltng-button--disabled')
 	}
 
-	// Merge custom styles
-	if (style) {
-		componentStyles = { ...componentStyles, ...style }
-	}
+    if (className) {
+        classes.push(className)
+    }
 
 	const buttonProps = {
 		...rest,
-		style: styleToString(componentStyles)
+		class: classes.join(' ')
 	}
+    if (style) buttonProps.style = typeof style === 'object' ? styleToString(style) : style // Pass through inline styles
 
 	if (disabled) {
 		buttonProps.disabled = true

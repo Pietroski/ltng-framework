@@ -11,6 +11,10 @@ function styleToString(styleObj) {
 	}).join('; ')
 }
 
+// Load styles
+window.loadCSS('/pkg/styles/theme.css')
+window.loadCSS('/pkg/components/form.css')
+
 // Form Store Implementation
 export const createFormStore = (initialState = {}, config = {}) => {
 	// Use ltng-framework's createStore if available, otherwise simple implementation
@@ -51,25 +55,21 @@ export const createFormStore = (initialState = {}, config = {}) => {
 }
 
 export const Form = (props, ...children) => {
-	const { style, onSubmit, store, ...rest } = props || {}
+	const { style, onSubmit, store, className = '', ...rest } = props || {}
 
-	const componentStyles = {
-		display: 'flex',
-		flexDirection: 'column',
-		gap: '10px',
-		width: '100%',
-		...(style || {})
-	}
+    const classes = ['ltng-form']
+    if (className) classes.push(className)
 
 	// We use a regular form element, but we need to handle submit manually
 	// to prevent page reload and use the store data.
 	const form = document.createElement('form')
 	// Apply props
 	Object.entries(rest).forEach(([key, value]) => {
-		if (key === 'class') form.className = value
+		if (key === 'class') return // Handle class separately
 		else form.setAttribute(key, value)
 	})
-	form.style.cssText = styleToString(componentStyles)
+    form.className = classes.join(' ')
+	form.style.cssText = styleToString(style)
 
 	form.onsubmit = (e) => {
 		e.preventDefault()
@@ -124,7 +124,7 @@ Form.Field = (props) => {
 	}
 
 	const errorSpan = Typography.Span({
-		style: { color: 'red', fontSize: '12px', minHeight: '15px', display: 'block' }
+        class: 'ltng-form-error-msg'
 	}, '')
 
 	const handleInput = (e) => {
@@ -172,7 +172,7 @@ Form.Field = (props) => {
 		}
 	})
 
-	return Div({ style: { display: 'flex', flexDirection: 'column' } },
+	return Div({ class: 'ltng-form-field-container' },
 		inputComponent,
 		errorSpan
 	)
@@ -212,17 +212,8 @@ Form.PrimaryButton = (props, ...children) => {
 				const actualBtn = btn.querySelector('button')
 				if (actualBtn) actualBtn.disabled = shouldDisable || disabled
 			}
-
-			// Visual update for disabled style if needed
-			// (The Button component handles style based on disabled prop, but dynamic updates might need manual style manipulation or re-render.
-			// Since we are mutating the DOM node, we might need to toggle classes or styles manually if the component doesn't observe attributes.)
-			if (shouldDisable) {
-				btn.style.opacity = '0.5'
-				btn.style.cursor = 'not-allowed'
-			} else {
-				btn.style.opacity = '1'
-				btn.style.cursor = 'pointer'
-			}
+            
+            // Visual update is handled by CSS :disabled pseudo-class
 		})
 	}
 

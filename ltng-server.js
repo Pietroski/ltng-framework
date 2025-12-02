@@ -3,7 +3,7 @@
 * A zero-dependency SSR/SSG server for ltng-framework.
 *
 * Usage:
-	*   node ltng-server.js           (Starts SSR server on port 3000)
+*   node ltng-server.js           (Starts SSR server on port 3000)
 *   node ltng-server.js --build   (Generates static files in ./dist)
 */
 
@@ -28,7 +28,7 @@ function renderFile(filePath) {
 	sandbox.window = sandbox // Circular reference
 	sandbox.global = sandbox // Node.js global reference
 
-	// Add Node.js globals that might be needed
+	// 3. Add Node.js globals that might be needed
 	sandbox.console = console
 	sandbox.setTimeout = setTimeout
 	sandbox.clearTimeout = clearTimeout
@@ -37,22 +37,119 @@ function renderFile(filePath) {
 
 	vm.createContext(sandbox)
 
-	// 3. Parse HTML to find scripts
+	// 4. Parse HTML to find scripts
 	// This is a very naive parser. It assumes scripts are <script src="..."> or inline <script>...</script>
 	// It does NOT handle complex HTML parsing.
 
+	// 4. Parse HTML to find scripts
 	// Extract scripts
 	const scriptRegex = /<script\b[^>]*>([\s\S]*?)<\/script>/gmi
 	const srcRegex = /src=["'](.*?)["']/
+    const typeRegex = /type=["'](.*?)["']/
+
+    // 4.1 Parse Import Map
+    let importMap = {}
+    let mapMatch
+    const mapRegex = /<script\b[^>]*type=["']importmap["'][^>]*>([\s\S]*?)<\/script>/gmi
+    while ((mapMatch = mapRegex.exec(content)) !== null) {
+        try {
+            const map = JSON.parse(mapMatch[1])
+            if (map.imports) {
+                importMap = { ...importMap, ...map.imports }
+            }
+        } catch (e) {
+            console.error('Failed to parse import map', e)
+        }
+    }
+
+    // Helper to resolve path using import map or relative path
+    function resolvePath(basePath, importPath) {
+        if (importMap[importPath]) {
+            // Resolve mapped path relative to the HTML file (or root?)
+            // Usually import map paths are relative to the base URL (HTML file location)
+            // But here we might have mapped it to '../../pkg/...'
+            // We should resolve it relative to the HTML file.
+            return path.join(path.dirname(filePath), importMap[importPath])
+        }
+        // Default relative resolve
+        return path.join(basePath, importPath)
+    }
+
+    // Helper to transpile and run module
+    const loadedModules = new Set()
+
+    function loadModule(modulePath, context) {
+        if (loadedModules.has(modulePath)) return
+        loadedModules.add(modulePath)
+
+        if (!fs.existsSync(modulePath)) {
+            console.error(`Module not found: ${modulePath}`)
+            return
+        }
+        
+        let scriptContent = fs.readFileSync(modulePath, 'utf8')
+        
+        // Handle dependencies (imports and re-exports)
+        // Matches:
+        // 1. import ... from 'path'
+        // 2. export ... from 'path'
+        // 3. import 'path'
+        const dependencyRegex = /(?:import|export)\s+(?:[\s\S]*?)\s+from\s+['"](.*?)['"]|import\s+['"](.*?)['"]/g
+        let match
+        while ((match = dependencyRegex.exec(scriptContent)) !== null) {
+            const depPathRaw = match[1] || match[2]
+            const depPath = resolvePath(path.dirname(modulePath), depPathRaw)
+            
+            // Avoid infinite recursion if circular (naive check)
+            // Ideally we should cache loaded modules.
+            // For now, just load it.
+            loadModule(depPath, context)
+        }
+
+        // Transpile
+        // 1. export const/var/let X = ... -> const/var/let X = window.X = ...
+        // 2. export function X ... -> function X ...; window.X = X;
+        // 3. export class X ... -> class X ...; window.X = X;
+        // 4. export default X -> window.default = X
+        // 5. export { X } -> (nothing, X is already on window if imported)
+        // 6. export * from '...' -> (handled by dependency loading)
+        // 7. Remove import/export statements
+        
+        // 7. Remove import/export statements
+        
+        const transpiled = `(function() {
+            ${scriptContent
+            // Handle export const/var/let
+            .replace(/export\s+(const|var|let)\s+(\w+)/g, '$1 $2 = window.$2')
+            // Handle export function
+            .replace(/export\s+function\s+(\w+)/g, 'window.$1 = function $1')
+            // Handle export class
+            .replace(/export\s+class\s+(\w+)/g, 'window.$1 = class $1')
+            
+            .replace(/export\s+default\s+(\w+)/g, 'window.default = $1')
+            .replace(/export\s+\{([\s\S]*?)\}/g, '') // Remove named exports
+            .replace(/(?:import|export)\s+(?:[\s\S]*?)\s+from\s+['"].*?['"]/g, '') // Remove imports/re-exports
+            .replace(/import\s+['"].*?['"]/g, '') // Remove side-effect imports
+            }
+        })()`
+
+        try {
+            vm.runInContext(transpiled, context)
+            // console.log(`Loaded module: ${modulePath}`)
+        } catch (e) {
+            console.error(`Error running module ${modulePath}:`, e)
+        }
+    }
 
 	let match
 	while ((match = scriptRegex.exec(content)) !== null) {
 		const fullTag = match[0]
+        const typeMatch = typeRegex.exec(fullTag)
+        const type = typeMatch ? typeMatch[1] : ''
+        const isModule = type === 'module'
+        const isImportMap = type === 'importmap'
 
-		// Skip module scripts in SSR as vm doesn't support them easily
-		if (fullTag.includes('type="module"')) {
-			continue
-		}
+        if (isImportMap) continue // Already handled
 
 		const innerScript = match[1]
 		const srcMatch = srcRegex.exec(fullTag)
@@ -61,24 +158,75 @@ function renderFile(filePath) {
 			// External script
 			const scriptPath = path.join(path.dirname(filePath), srcMatch[1])
 			if (fs.existsSync(scriptPath)) {
-				const scriptContent = fs.readFileSync(scriptPath, 'utf8')
-				try {
-					vm.runInContext(scriptContent, sandbox)
-				} catch (e) {
-					console.error(`Error running script ${srcMatch[1]}:`, e)
-				}
+                if (isModule) {
+                    loadModule(scriptPath, sandbox)
+                } else {
+                    // Classic script
+				    let scriptContent = fs.readFileSync(scriptPath, 'utf8')
+				    try {
+					    vm.runInContext(scriptContent, sandbox)
+				    } catch (e) {
+					    console.error(`Error running script ${srcMatch[1]}:`, e)
+				    }
+                }
+			} else {
+				console.error(`Script not found: ${scriptPath}`)
 			}
 		} else if (innerScript.trim()) {
 			// Inline script
-			try {
-				vm.runInContext(innerScript, sandbox)
-			} catch (e) {
-				console.error('Error running inline script:', e)
-			}
+            if (isModule) {
+                 // Inline module
+                 // We need to handle imports
+                 const dependencyRegex = /(?:import|export)\s+(?:({[\s\S]*?})|(\w+))\s+from\s+['"](.*?)['"]|import\s+['"](.*?)['"]/g
+                 let depMatch
+                 while ((depMatch = dependencyRegex.exec(innerScript)) !== null) {
+                    const importsBlock = depMatch[1] // { ... }
+                    const defaultImport = depMatch[2] // Name
+                    const depPathRaw = depMatch[3] || depMatch[4]
+                    
+                    if (depPathRaw) {
+                        const depPath = resolvePath(path.dirname(filePath), depPathRaw)
+                        loadModule(depPath, sandbox)
+                    }
+
+                    // Handle Aliases
+                    if (importsBlock) {
+                        const content = importsBlock.replace(/[{}]/g, '')
+                        const parts = content.split(',')
+                        parts.forEach(part => {
+                            const [original, alias] = part.split(/\s+as\s+/).map(s => s.trim())
+                            if (alias && original) {
+                                try {
+                                    vm.runInContext(`window.${alias} = window.${original}`, sandbox)
+                                } catch (e) {
+                                    console.error(`Failed to set alias ${alias} for ${original}`, e)
+                                }
+                            }
+                        })
+                    }
+                 }
+
+                 // Remove imports
+                 const scriptToRun = innerScript
+                    .replace(/(?:import|export)\s+(?:[\s\S]*?)\s+from\s+['"].*?['"]/g, '')
+                    .replace(/import\s+['"].*?['"]/g, '')
+
+                 try {
+                    vm.runInContext(scriptToRun, sandbox)
+                 } catch (e) {
+                    console.error('Error running inline module:', e)
+                 }
+            } else {
+			    try {
+				    vm.runInContext(innerScript, sandbox)
+			    } catch (e) {
+				    console.error('Error running inline script:', e)
+			    }
+            }
 		}
 	}
 
-	// 4. Serialize
+	// 5. Serialize
 	// We inject the rendered body content back into the HTML
 	// Naive injection: replace <body>...</body> or append to body if empty in source
 	// Actually, our mock DOM only populated `document.body`.
@@ -104,7 +252,24 @@ function renderFile(filePath) {
 	}
 
 	const bodyContent = document.body.toString().replace('</body>', `${scripts}</body>`)
-	const finalHtml = content.replace(bodyRegex, bodyContent)
+	let finalHtml = content.replace(bodyRegex, bodyContent)
+
+	// Inject Head Content (Styles)
+	const headRegex = /<head\b[^>]*>([\s\S]*?)<\/head>/i
+	// We only want to append new links/styles to the existing head
+	// document.head.toString() returns <head>...</head>
+	// We want the inner content of our mock head
+	const mockHeadContent = document.head.childNodes.map(c => c.toString()).join('')
+	
+	if (mockHeadContent) {
+		if (headRegex.test(finalHtml)) {
+			finalHtml = finalHtml.replace('</head>', `${mockHeadContent}</head>`)
+		} else {
+			// No head tag? prepend to body or html?
+			// Ideally HTML should have head. If not, we might insert it before body.
+			// For now, assume valid HTML structure or just ignore if no head.
+		}
+	}
 
 	return finalHtml
 }
@@ -156,7 +321,17 @@ if (isBuild) {
 				}
 			}
 
-			const html = renderFile(filePath)
+			let html = renderFile(filePath)
+
+            // Rewrite asset paths to be flat in dist
+            referencedScripts.forEach(scriptPath => {
+                const fileName = path.basename(scriptPath)
+                // Simple string replacement for now. 
+                // In a robust system we'd parse HTML, but here we just replace the src string.
+                // We use split/join to replace all occurrences.
+                html = html.split(scriptPath).join(fileName)
+            })
+
 			fs.writeFileSync(path.join(DIST_DIR, file), html)
 			console.log(`Saved ${file}`)
 		} catch (e) {
@@ -168,15 +343,19 @@ if (isBuild) {
 	referencedScripts.forEach(file => {
 		const filePath = path.join(SRC_DIR, file)
 		if (fs.existsSync(filePath)) {
-			// Create subdirectories if needed (e.g. css/style.css)
-			const destPath = path.join(DIST_DIR, file)
-			const destDir = path.dirname(destPath)
-			if (!fs.existsSync(destDir)) fs.mkdirSync(destDir, { recursive: true })
-
-			fs.copyFileSync(filePath, destPath)
-			console.log(`Copied referenced asset: ${file}`)
+			// Flatten structure: copy all assets to root of dist
+			const fileName = path.basename(file)
+			const destPath = path.join(DIST_DIR, fileName)
+            
+            // Ensure we don't overwrite if multiple files have same name (naive check)
+            if (fs.existsSync(destPath)) {
+                console.log(`Asset ${fileName} already exists in dist, skipping copy.`)
+            } else {
+			    fs.copyFileSync(filePath, destPath)
+			    console.log(`Copied referenced asset: ${file} -> ${fileName}`)
+            }
 		} else {
-			console.warn(`Warning: Referenced asset ${file} not found.`)
+			console.warn(`Warning: Referenced asset ${file} not found at ${filePath}`)
 		}
 	})
 

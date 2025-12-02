@@ -6,33 +6,24 @@ function styleToString(styleObj) {
 	}).join('; ')
 }
 
-const DefaultFooterStyling = {
-	backgroundColor: '#1976d2',
-	minHeight: '250px',
-	width: '100%',
-	border: '0',
-	margin: '0',
-	padding: '0',
-	display: 'flex', // Added for better content layout by default
-	flexDirection: 'column',
-	justifyContent: 'center',
-	alignItems: 'center',
-	color: 'white'
-}
+// Load styles
+window.loadCSS('/pkg/styles/theme.css')
+window.loadCSS('/pkg/components/footer.css')
 
 // Alias global Footer to avoid recursion if we named it Footer
 const GlobalFooter = window.Footer
 
 export const Footer = (props, ...children) => {
-	const { style, ...rest } = props || {}
+	const { className = '', style, ...rest } = props || {}
 
-	const componentStyles = {
-		...DefaultFooterStyling,
-		...(style || {})
-	}
+    const classes = ['ltng-footer']
+    if (className) classes.push(className)
 
-	return GlobalFooter({
+    const footerProps = {
 		...rest,
-		style: styleToString(componentStyles)
-	}, ...children)
+		class: classes.join(' ')
+	}
+    if (style) footerProps.style = typeof style === 'object' ? styleToString(style) : style
+
+	return GlobalFooter(footerProps, ...children)
 }

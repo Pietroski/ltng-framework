@@ -33,7 +33,10 @@ registerStory('Modal', 'Modal component with overlay and close actions.', () => 
 				darkMode: currentDarkMode
 			},
 				Typography.H3({ darkMode: currentDarkMode }, 'Hello from Modal!'),
-				Typography.Paragraph({ darkMode: currentDarkMode, style: { marginBottom: '20px' } }, `This is a ${currentDarkMode ? 'Dark' : 'Light'} modal dialog.`),
+				Typography.Paragraph({
+					darkMode: currentDarkMode,
+					style: { marginBottom: '20px' }
+				}, `This is a ${currentDarkMode ? 'Dark' : 'Light'} modal dialog.`),
 				Button.Primary({ onClick: () => { isOpen = false; renderModal() } }, 'Close Me')
 			)
 			container.appendChild(modalElement)
@@ -47,7 +50,7 @@ registerStory('Modal', 'Modal component with overlay and close actions.', () => 
 		}
 	}, 'Open Dark Modal')
 	const openLightBtn = Button.Secondary({
-		style: { marginLeft: '10px' },
+		style: { marginLeft: '20px' },
 		onClick: () => {
 			isOpen = true
 			currentDarkMode = false

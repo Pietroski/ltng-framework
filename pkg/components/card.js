@@ -6,65 +6,38 @@ function styleToString(styleObj) {
 	}).join('; ')
 }
 
-const Colours = {
-	Primary: '#1976d2',
-	Whitesmoke: 'whitesmoke',
-	DarkGray: '#333',
-}
-
-const DefaultCardStyles = (darkMode) => ({
-	width: '250px',
-	height: '150px',
-	position: 'relative',
-	borderRadius: '15px',
-	border: `1px solid ${Colours.Primary}`,
-	boxSizing: 'border-box',
-	backgroundColor: darkMode ? Colours.Whitesmoke : Colours.DarkGray,
-	color: darkMode ? 'black' : 'white',
-	display: 'flex',
-	flexDirection: 'column',
-	justifyContent: 'center',
-	alignItems: 'center',
-})
-
-const CloseButtonStyles = {
-	width: '35px',
-	height: '35px',
-	position: 'absolute',
-	top: 0,
-	right: 0,
-	borderRadius: '15px',
-	border: `1px solid ${Colours.Primary}`,
-	boxSizing: 'border-box',
-	display: 'flex',
-	justifyContent: 'center',
-	alignItems: 'center',
-	cursor: 'pointer',
-	backgroundColor: 'transparent',
-	color: 'inherit',
-}
+// Load styles
+window.loadCSS('/pkg/styles/theme.css')
+window.loadCSS('/pkg/components/card.css')
 
 // Alias global Div to avoid recursion if we named it Div
 const GlobalDiv = window.Div
 
 export const Card = (props, ...children) => {
-	const { darkMode = true, style, ...rest } = props || {}
+	const { darkMode = true, className = '', style, ...rest } = props || {}
 
-	const componentStyles = {
-		...DefaultCardStyles(darkMode),
-		...(style || {})
-	}
+    const classes = ['ltng-card']
+    if (darkMode) classes.push('ltng-card--dark')
+    else classes.push('ltng-card--light')
+    
+    if (className) classes.push(className)
 
-	return Div({
+	return GlobalDiv({
 		...rest,
-		style: styleToString(componentStyles)
+		class: classes.join(' '),
+        style: typeof style === 'object' ? styleToString(style) : style
 	}, ...children)
 }
 
 const CardCloseButton = (props) => {
-	const { onClick, style } = props
-	return Div({
-		style: styleToString({ ...CloseButtonStyles, ...(style || {}) }),
+	const { onClick, style, className = '' } = props
+    
+    const classes = ['ltng-card-close-btn']
+    if (className) classes.push(className)
+
+	return GlobalDiv({
+		class: classes.join(' '),
+        style: typeof style === 'object' ? styleToString(style) : style,
 		onClick: onClick
 	}, 'X')
 }

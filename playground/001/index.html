@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ltng-framework Test</title>
+	<script src="../../ltng-framework.js"></script>
+	<script src="theme.js"></script>
+	<style>
+		body {
+			font-family: sans-serif;
+			padding: 20px;
+		}
+
+		.container {
+			border: 1px solid #ccc;
+			padding: 20px;
+			border-radius: 8px;
+		}
+
+		.header {
+			background-color: #f0f0f0;
+			padding: 10px;
+			margin-bottom: 10px;
+		}
+
+		.btn {
+			padding: 8px 16px;
+			background-color: #007bff;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+		}
+
+		.btn:hover {
+			background-color: #0056b3;
+		}
+	</style>
+</head>
+
+<body>
+	<script>
+		Body.render(
+			Div({ class: 'container' },
+				Header({ class: 'header' },
+					H1({}, 'Welcome to ltng-framework'),
+					P({}, 'This is a test of the lightweight framework.')
+				),
+				Main({},
+					P({}, 'Below is a generated list:'),
+					Ul({},
+						Li({}, 'Item 1'),
+						Li({}, 'Item 2'),
+						Li({}, 'Item 3')
+					),
+					Div({ style: 'margin-top: 20px;' },
+						Button({
+							class: 'btn',
+							onClick: () => overlayModal({}, 'Button clicked! This is a custom modal.')
+						}, 'Click Me')
+					)
+				),
+				Footer({ style: 'margin-top: 20px; color: #666;' },
+					P({}, '© 2025 ltng-framework')
+				)
+			)
+		)
+
+		// --- State Management Demo ---
+
+		// 1. Counter Store
+		const counterStore = createStore({ count: 0 })
+
+		const counterDisplay = Span({ style: 'font-weight: bold; margin: 0 10px;' }, '0')
+
+		counterStore.subscribe(state => {
+			counterDisplay.textContent = state.count
+		})
+
+		const counterSection = Div({ class: 'container', style: 'margin-top: 20px;' },
+			H3({}, 'State Management: Counter'),
+			Div({},
+				Button({ onClick: () => counterStore.setState({ count: counterStore.getState().count - 1 }) }, '-'),
+				counterDisplay,
+				Button({ onClick: () => counterStore.setState({ count: counterStore.getState().count + 1 }) }, '+')
+			)
+		)
+		Body.render(counterSection)
+
+		// 2. Persisted Theme Store
+		const themeStore = createStore({ dark: false }, { persist: 'ltng_theme' })
+
+		const themeBtn = Button({ class: 'btn', style: 'margin-top: 10px;' }, 'Toggle Theme')
+		themeStore.subscribe(setTheme)
+
+		const themeSection = Div({ class: 'container', style: 'margin-top: 20px;' },
+			H3({}, 'Persistence: Theme'),
+			P({}, 'Reload the page to see the theme persist!'),
+			themeBtn,
+			Div({ style: 'margin-top: 15px;' },
+				A({ href: 'page2.html', style: 'color: #007bff;' }, 'Go to Page 2 (Context Test)')
+			)
+		)
+
+		themeBtn.onclick = () => themeStore.setState({ dark: !themeStore.getState().dark })
+
+		Body.render(themeSection);
+	</script>
+</body>
+
+</html>

@@ -1,46 +1,11 @@
 import { Card } from './card.js'
 import { Div } from './containers.js'
 
-// Helper to convert style object to string
-function styleToString(styleObj) {
-	return Object.entries(styleObj || {}).map(([key, value]) => {
-		const kebabKey = key.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, '$1-$2').toLowerCase()
-		return `${kebabKey}: ${value}`
-	}).join('; ')
-}
+// Load styles
+window.loadCSS('/pkg/styles/theme.css')
+window.loadCSS('/pkg/components/modal.css')
 
-const Colours = {
-	DarkGray: '#333',
-	MediumDarkerGray: '#444',
-	Whitesmoke: 'whitesmoke',
-	Primary: '#1976d2',
-}
-
-// Base container that covers the screen and centers content
-const BaseContainerStyles = (darkMode) => ({
-	position: 'fixed',
-	top: '0',
-	left: '0',
-	width: '100vw',
-	height: '100vh',
-	display: 'flex',
-	flexDirection: 'column',
-	justifyContent: 'center',
-	alignItems: 'center',
-	zIndex: '1000',
-})
-
-// The semi-transparent background overlay
-const BackgroundOverlayStyles = (darkMode) => ({
-	position: 'absolute',
-	top: '0',
-	left: '0',
-	width: '100%',
-	height: '100%',
-	backgroundColor: Colours.DarkGray,
-	opacity: '0.6',
-	zIndex: '1',
-})
+const GlobalDiv = window.Div
 
 export const Modal = (props, ...children) => {
 	const {
@@ -49,14 +14,15 @@ export const Modal = (props, ...children) => {
 		darkMode = true,
 		style,
 		closeFromOutside = true,
+        className = '',
 		...rest
 	} = props || {}
 
 	if (!isOpen) return null
 
 	// The background overlay that handles clicks
-	const backgroundOverlay = Div({
-		style: BackgroundOverlayStyles(darkMode),
+	const backgroundOverlay = GlobalDiv({
+		class: 'ltng-modal-overlay',
 		onClick: (e) => {
 			if (closeFromOutside && onClose) {
 				onClose(e)
@@ -64,29 +30,27 @@ export const Modal = (props, ...children) => {
 		}
 	})
 
+    // Content Classes
+    const contentClasses = ['ltng-modal-content']
+    if (darkMode) contentClasses.push('ltng-modal-content--dark')
+    else contentClasses.push('ltng-modal-content--light')
+
 	// The content card
 	const content = Card.Closable({
 		darkMode,
 		onCloseClick: onClose,
-		style: {
-			width: '500px',
-			height: '300px',
-			backgroundColor: darkMode ? Colours.MediumDarkerGray : Colours.Whitesmoke,
-			color: darkMode ? 'white' : 'black',
-			display: 'flex',
-			flexDirection: 'column',
-			alignItems: 'center',
-			justifyContent: 'center',
-			position: 'relative', // Ensure it sits above absolute overlay if needed, though z-index handles it
-			zIndex: '2',
-			...(style || {})
-		},
+        className: contentClasses.join(' '),
+		style: style,
 		...rest
 	}, ...children)
 
+    // Container Classes
+    const containerClasses = ['ltng-modal-container']
+    if (className) containerClasses.push(className)
+
 	// The main container holding both
-	const baseContainer = Div({
-		style: BaseContainerStyles(darkMode)
+	const baseContainer = GlobalDiv({
+		class: containerClasses.join(' ')
 	}, backgroundOverlay, content)
 
 	return baseContainer

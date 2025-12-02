@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ltng-framework Page 2</title>
+	<script src="../../ltng-framework.js"></script>
+	<script src="theme.js"></script>
+	<style>
+		body {
+			font-family: sans-serif;
+			padding: 20px;
+		}
+
+		.container {
+			border: 1px solid #ccc;
+			padding: 20px;
+			border-radius: 8px;
+		}
+	</style>
+	<script type="importmap">
+		{
+			"imports": {
+				"ltng-components": "../../pkg/components/index.js"
+			}
+		}
+	</script>
+</head>
+
+<body>
+	<script type="module">
+		import { Div as LTNGDiv, Button as LTNGButton } from "ltng-components";
+
+		// Initialize the SAME store with the SAME persist key
+		const themeStore = createStore({}, { persist: 'ltng_theme' })
+		themeStore.subscribe(setTheme)
+
+		Body.render(
+			LTNGDiv({ class: 'container' },
+				H1({}, 'Page 2'),
+				P({}, 'This page shares the same context (theme) as the home page via localStorage.'),
+				LTNGDiv({ style: 'margin-top: 20px;' },
+					LTNGButton({
+						onClick: () => themeStore.setState({ dark: !themeStore.getState().dark }),
+						style: 'padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;'
+					}, 'Toggle Theme Here')
+				),
+				LTNGDiv({ style: 'margin-top: 20px;' },
+					A({ href: 'index.html', style: 'color: #007bff;' }, 'Back to Home')
+				)
+			)
+		)
+	</script>
+</body>
+
+</html>
