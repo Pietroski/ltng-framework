@@ -41,9 +41,6 @@ export const FlexStyleOpts = {
 window.loadCSS('/pkg/styles/theme.css')
 window.loadCSS('/pkg/components/containers.css')
 
-// Alias global Div to avoid recursion if we named it Div
-const GlobalDiv = window.Div
-
 export const Div = (props, ...children) => {
 	const { className = '', style, ...rest } = props || {}
 
@@ -56,7 +53,7 @@ export const Div = (props, ...children) => {
 	}
     if (style) containerProps.style = typeof style === 'object' ? styleToString(style) : style
 
-	return GlobalDiv(containerProps, ...children)
+	return div(containerProps, ...children)
 }
 
 Div.Flex = (props, ...children) => {
@@ -71,7 +68,7 @@ Div.Flex = (props, ...children) => {
 	}
     if (style) containerProps.style = typeof style === 'object' ? styleToString(style) : style
 
-	return GlobalDiv(containerProps, ...children)
+	return div(containerProps, ...children)
 }
 
 Div.Grid = (props, ...children) => {
@@ -86,5 +83,5 @@ Div.Grid = (props, ...children) => {
 	}
     if (style) containerProps.style = typeof style === 'object' ? styleToString(style) : style
 
-	return GlobalDiv(containerProps, ...children)
+	return div(containerProps, ...children)
 }

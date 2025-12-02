@@ -7,20 +7,20 @@ const store = createStore({
 
 // Components
 const SidebarItem = (story, isActive) => {
-	return Div({
+	return div({
 		class: `nav-item ${isActive ? 'active' : ''}`,
 		onClick: () => store.setState({ currentStory: story.name })
 	}, story.name)
 }
 
 const Sidebar = (currentStoryName) => {
-	return Div({ class: 'sidebar' },
-		Div({
+	return div({ class: 'sidebar' },
+		div({
 			class: 'sidebar-header',
 			style: 'cursor: pointer;',
 			onClick: () => store.setState({ currentStory: null })
 		}, 'ltng-book'),
-		Div({ class: 'nav-list' },
+		div({ class: 'nav-list' },
 			Object.values(stories).map(story =>
 				SidebarItem(story, story.name === currentStoryName)
 			)
@@ -30,19 +30,19 @@ const Sidebar = (currentStoryName) => {
 
 const Preview = (story) => {
 	if (!story) {
-		return Div({ class: 'preview-area' },
-			Div({ style: 'color: #666; text-align: center; margin-top: 50px;' },
+		return div({ class: 'preview-area' },
+			div({ style: 'color: #666; text-align: center; margin-top: 50px;' },
 				'Select a component to view'
 			)
 		)
 	}
 
-	return Div({ class: 'preview-area' },
-		Div({ class: 'preview-header' },
-			H2({}, story.name),
-			P({ style: 'color: #666;' }, story.description || '')
+	return div({ class: 'preview-area' },
+		div({ class: 'preview-header' },
+			h2({}, story.name),
+			p({ style: 'color: #666;' }, story.description || '')
 		),
-		Div({ class: 'component-container' },
+		div({ class: 'component-container' },
 			story.render()
 		)
 	)
@@ -51,7 +51,7 @@ const Preview = (story) => {
 const App = () => {
 	const state = store.getState()
 	const currentStory = state.currentStory ? stories[state.currentStory] : null
-	return Div({ style: 'display: flex; width: 100%; height: 100%;' },
+	return div({ style: 'display: flex; width: 100%; height: 100%;' },
 		Sidebar(state.currentStory),
 		Preview(currentStory)
 	)

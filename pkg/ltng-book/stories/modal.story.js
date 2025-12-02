@@ -1,8 +1,5 @@
 import { registerStory } from './registry.js'
-import { Modal } from '../../../pkg/components/modal.js'
-import { Button } from '../../../pkg/components/button.js'
-import { Div } from '../../../pkg/components/containers.js'
-import { Typography } from '../../../pkg/components/typography.js'
+import { Button, Div, Modal, Typography } from '../../../pkg/components/index.js'
 
 registerStory('Modal', 'Modal component with overlay and close actions.', () => {
 	// We need state to manage open/close

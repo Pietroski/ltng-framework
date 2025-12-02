@@ -10,34 +10,31 @@ function styleToString(styleObj) {
 window.loadCSS('/pkg/styles/theme.css')
 window.loadCSS('/pkg/components/card.css')
 
-// Alias global Div to avoid recursion if we named it Div
-const GlobalDiv = window.Div
-
 export const Card = (props, ...children) => {
 	const { darkMode = true, className = '', style, ...rest } = props || {}
 
-    const classes = ['ltng-card']
-    if (darkMode) classes.push('ltng-card--dark')
-    else classes.push('ltng-card--light')
-    
-    if (className) classes.push(className)
+	const classes = ['ltng-card']
+	if (darkMode) classes.push('ltng-card--dark')
+	else classes.push('ltng-card--light')
 
-	return GlobalDiv({
+	if (className) classes.push(className)
+
+	return div({
 		...rest,
 		class: classes.join(' '),
-        style: typeof style === 'object' ? styleToString(style) : style
+		style: typeof style === 'object' ? styleToString(style) : style
 	}, ...children)
 }
 
 const CardCloseButton = (props) => {
 	const { onClick, style, className = '' } = props
-    
-    const classes = ['ltng-card-close-btn']
-    if (className) classes.push(className)
 
-	return GlobalDiv({
+	const classes = ['ltng-card-close-btn']
+	if (className) classes.push(className)
+
+	return div({
 		class: classes.join(' '),
-        style: typeof style === 'object' ? styleToString(style) : style,
+		style: typeof style === 'object' ? styleToString(style) : style,
 		onClick: onClick
 	}, 'X')
 }

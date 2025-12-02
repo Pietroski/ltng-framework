@@ -1,5 +1,3 @@
-const GlobalButton = window.Button
-
 // Helper to convert style object to string
 function styleToString(styleObj) {
 	return Object.entries(styleObj || {}).map(([key, value]) => {
@@ -16,7 +14,7 @@ export const Button = (props, ...children) => {
 	const { variant = 'default', disabled, className = '', style, ...rest } = props || {}
 
 	const classes = ['ltng-button']
-	
+
 	if (variant === 'primary') {
 		classes.push('ltng-button--primary')
 	} else if (variant === 'secondary') {
@@ -28,21 +26,21 @@ export const Button = (props, ...children) => {
 		// classes.push('ltng-button--disabled')
 	}
 
-    if (className) {
-        classes.push(className)
-    }
+	if (className) {
+		classes.push(className)
+	}
 
 	const buttonProps = {
 		...rest,
 		class: classes.join(' ')
 	}
-    if (style) buttonProps.style = typeof style === 'object' ? styleToString(style) : style // Pass through inline styles
+	if (style) buttonProps.style = typeof style === 'object' ? styleToString(style) : style // Pass through inline styles
 
 	if (disabled) {
 		buttonProps.disabled = true
 	}
 
-	return GlobalButton(buttonProps, ...children)
+	return button(buttonProps, ...children)
 }
 
 Button.Primary = (props, ...children) => Button({ ...props, variant: 'primary' }, ...children)

@@ -28,17 +28,17 @@
 		themeStore.subscribe(setTheme)
 
 		Body.render(
-			Div({ class: 'container' },
-				H1({}, 'Page 2'),
-				P({}, 'This page shares the same context (theme) as the home page via localStorage.'),
-				Div({ style: 'margin-top: 20px;' },
-					Button({
+			div({ class: 'container' },
+				h1({}, 'Page 2'),
+				p({}, 'This page shares the same context (theme) as the home page via localStorage.'),
+				div({ style: 'margin-top: 20px;' },
+					button({
 						onClick: () => themeStore.setState({ dark: !themeStore.getState().dark }),
 						style: 'padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;'
 					}, 'Toggle Theme Here')
 				),
-				Div({ style: 'margin-top: 20px;' },
-					A({ href: 'index.html', style: 'color: #007bff;' }, 'Back to Home')
+				div({ style: 'margin-top: 20px;' },
+					a({ href: 'index.html', style: 'color: #007bff;' }, 'Back to Home')
 				)
 			)
 		)

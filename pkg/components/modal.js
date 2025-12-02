@@ -1,57 +1,54 @@
 import { Card } from './card.js'
-import { Div } from './containers.js'
 
 // Load styles
 window.loadCSS('/pkg/styles/theme.css')
 window.loadCSS('/pkg/components/modal.css')
 
-const GlobalDiv = window.Div
-
 export const Modal = (props, ...children) => {
-	const {
-		isOpen,
-		onClose,
-		darkMode = true,
-		style,
-		closeFromOutside = true,
+    const {
+        isOpen,
+        onClose,
+        darkMode = true,
+        style,
+        closeFromOutside = true,
         className = '',
-		...rest
-	} = props || {}
+        ...rest
+    } = props || {}
 
-	if (!isOpen) return null
+    if (!isOpen) return null
 
-	// The background overlay that handles clicks
-	const backgroundOverlay = GlobalDiv({
-		class: 'ltng-modal-overlay',
-		onClick: (e) => {
-			if (closeFromOutside && onClose) {
-				onClose(e)
-			}
-		}
-	})
+    // The background overlay that handles clicks
+    const backgroundOverlay = div({
+        class: 'ltng-modal-overlay',
+        onClick: (e) => {
+            if (closeFromOutside && onClose) {
+                onClose(e)
+            }
+        }
+    })
 
     // Content Classes
     const contentClasses = ['ltng-modal-content']
     if (darkMode) contentClasses.push('ltng-modal-content--dark')
     else contentClasses.push('ltng-modal-content--light')
 
-	// The content card
-	const content = Card.Closable({
-		darkMode,
-		onCloseClick: onClose,
+    // The content card
+    const content = Card.Closable({
+        darkMode,
+        onCloseClick: onClose,
         className: contentClasses.join(' '),
-		style: style,
-		...rest
-	}, ...children)
+        style: style,
+        ...rest
+    }, ...children)
 
     // Container Classes
     const containerClasses = ['ltng-modal-container']
     if (className) containerClasses.push(className)
 
-	// The main container holding both
-	const baseContainer = GlobalDiv({
-		class: containerClasses.join(' ')
-	}, backgroundOverlay, content)
+    // The main container holding both
+    const baseContainer = div({
+        class: containerClasses.join(' ')
+    }, backgroundOverlay, content)
 
-	return baseContainer
+    return baseContainer
 }

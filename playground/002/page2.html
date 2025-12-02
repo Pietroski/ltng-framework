@@ -38,8 +38,8 @@
 
 		Body.render(
 			LTNGDiv({ class: 'container' },
-				H1({}, 'Page 2'),
-				P({}, 'This page shares the same context (theme) as the home page via localStorage.'),
+				h1({}, 'Page 2'),
+				p({}, 'This page shares the same context (theme) as the home page via localStorage.'),
 				LTNGDiv({ style: 'margin-top: 20px;' },
 					LTNGButton({
 						onClick: () => themeStore.setState({ dark: !themeStore.getState().dark }),
@@ -47,7 +47,7 @@
 					}, 'Toggle Theme Here')
 				),
 				LTNGDiv({ style: 'margin-top: 20px;' },
-					A({ href: 'index.html', style: 'color: #007bff;' }, 'Back to Home')
+					a({ href: 'index.html', style: 'color: #007bff;' }, 'Back to Home')
 				)
 			)
 		)

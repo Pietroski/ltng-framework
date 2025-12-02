@@ -2,9 +2,6 @@
 window.loadCSS('/pkg/styles/theme.css')
 window.loadCSS('/pkg/components/input.css')
 
-// Alias global Input to avoid recursion if we named it Input
-const GlobalInput = window.Input
-
 export const Input = (props) => {
 	const {
 		id,
@@ -30,7 +27,7 @@ export const Input = (props) => {
     else inputClasses.push('ltng-input-field--light')
     if (isSecret) inputClasses.push('ltng-input-field--secret')
 
-	const inputEl = GlobalInput({
+	const inputEl = input({
 		id: inputId,
 		type: currentType,
 		value: value || '',
@@ -48,7 +45,7 @@ export const Input = (props) => {
     else labelClasses.push('ltng-input-label--light')
 
 	const children = [
-		Label({
+		window.label({
             class: labelClasses.join(' '),
 			for: inputId
 		}, placeholder || ''),
@@ -60,7 +57,7 @@ export const Input = (props) => {
         if (darkMode) toggleClasses.push('ltng-input-secret-toggle--dark')
         else toggleClasses.push('ltng-input-secret-toggle--light')
 
-		const toggleBtn = Div({
+		const toggleBtn = div({
             class: toggleClasses.join(' '),
 			onClick: (e) => {
 				const input = document.getElementById(inputId)
@@ -84,7 +81,7 @@ export const Input = (props) => {
     else wrapperClasses.push('ltng-input-wrapper--light')
     if (className) wrapperClasses.push(className)
 
-	return Div({
+	return div({
         class: wrapperClasses.join(' '),
         style: style
 	}, ...children)

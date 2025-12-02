@@ -134,29 +134,29 @@ function createElement(tag, props, ...children) {
 // Element Wrappers
 // We can define common HTML tags here
 const tags = [
-	'Div', 'Span', 'Header', 'Footer', 'Main', 'Section', 'Article',
-	'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'P', 'A', 'Button', 'Input',
-	'Label', 'Ul', 'Ol', 'Li', 'Img', 'Form', 'Nav'
+	'div', 'span', 'header', 'footer', 'main', 'section', 'article',
+	'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'button', 'input',
+	'label', 'ul', 'ol', 'li', 'img', 'form', 'nav'
 ]
 
 tags.forEach(tagName => {
 	window[tagName] = (props, ...children) => {
-		return createElement(tagName.toLowerCase(), props, ...children)
+		return createElement(tagName, props, ...children)
 	}
 })
 
 // Simple Modal Component
 window.overlayModal = (props, content) => {
-	const overlay = Div({
+	const overlay = div({
 		...props,
 		style: 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;'
 	},
-		Div({
+		div({
 			style: 'background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-width: 300px; display: flex; flex-direction: column; gap: 15px;'
 		},
-			Div({ style: 'font-size: 1.1em; color: #333;' }, content),
-			Div({ style: 'display: flex; justify-content: flex-end;' },
-				Button({
+			div({ style: 'font-size: 1.1em; color: #333;' }, content),
+			div({ style: 'display: flex; justify-content: flex-end;' },
+				button({
 					onClick: (e) => {
 						// Remove the overlay from the DOM
 						const overlayEl = e.target.closest('[style*="position: fixed"]')

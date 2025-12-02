@@ -42,13 +42,13 @@ const createTypographyComponent = (tag, variantClass) => (props, ...children) =>
 }
 
 export const Typography = (props, ...children) => {
-	return createTypographyComponent('Div')(props, ...children)
+	return createTypographyComponent('div')(props, ...children)
 }
 
-Typography.H1 = createTypographyComponent('H1', 'ltng-typography-h1')
-Typography.H2 = createTypographyComponent('H2', 'ltng-typography-h2')
-Typography.H3 = createTypographyComponent('H3', 'ltng-typography-h3')
-Typography.H4 = createTypographyComponent('H4', 'ltng-typography-h4')
-Typography.H5 = createTypographyComponent('H5', 'ltng-typography-h5')
-Typography.Paragraph = createTypographyComponent('P', 'ltng-typography-p')
-Typography.Span = createTypographyComponent('Span', 'ltng-typography-span')
+Typography.H1 = createTypographyComponent('h1', 'ltng-typography-h1')
+Typography.H2 = createTypographyComponent('h2', 'ltng-typography-h2')
+Typography.H3 = createTypographyComponent('h3', 'ltng-typography-h3')
+Typography.H4 = createTypographyComponent('h4', 'ltng-typography-h4')
+Typography.H5 = createTypographyComponent('h5', 'ltng-typography-h5')
+Typography.Paragraph = createTypographyComponent('p', 'ltng-typography-p')
+Typography.Span = createTypographyComponent('span', 'ltng-typography-span')

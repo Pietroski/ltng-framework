@@ -10,20 +10,17 @@ function styleToString(styleObj) {
 window.loadCSS('/pkg/styles/theme.css')
 window.loadCSS('/pkg/components/footer.css')
 
-// Alias global Footer to avoid recursion if we named it Footer
-const GlobalFooter = window.Footer
-
 export const Footer = (props, ...children) => {
 	const { className = '', style, ...rest } = props || {}
 
-    const classes = ['ltng-footer']
-    if (className) classes.push(className)
+	const classes = ['ltng-footer']
+	if (className) classes.push(className)
 
-    const footerProps = {
+	const footerProps = {
 		...rest,
 		class: classes.join(' ')
 	}
-    if (style) footerProps.style = typeof style === 'object' ? styleToString(style) : style
+	if (style) footerProps.style = typeof style === 'object' ? styleToString(style) : style
 
-	return GlobalFooter(footerProps, ...children)
+	return footer(footerProps, ...children)
 }
