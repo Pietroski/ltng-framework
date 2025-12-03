@@ -37,24 +37,14 @@ function resolvePath(basePath, importPath, importMap = {}) {
  * @param {string} filename - The filename for context (optional).
  * @returns {string} Transpiled code.
  */
-function transpile(code, filename = '') {
+function transpile(code, filename = '', options = {}) {
     let transpiled = code
 
     // 1. Handle Imports
-    // import { Div as LTNGDiv } from "ltng-components";
-    // -> const LTNGDiv = window.Div; (assuming "ltng-components" exports Div globally as window.Div)
-    
-    // We need to know what the module exports globally.
-    // This is tricky without a registry.
-    // However, the requirement says:
-    // import { Div as LTNGDiv } from "ltng-components";
-    // And use it as <LTNGDiv>...
-    
-    // If we assume that "ltng-components" has already run and registered `window.Div`,
-    // then `import { Div as LTNGDiv }` essentially means `const LTNGDiv = window.Div`.
-    
+    // ... (existing import logic) ...
     const importRegex = /import\s+\{([\s\S]*?)\}\s+from\s+['"](.*?)['"]/g
     transpiled = transpiled.replace(importRegex, (match, imports, source) => {
+        // ... (existing assignment logic) ...
         const assignments = imports.split(',').map(part => {
             part = part.trim()
             if (!part) return ''
@@ -73,26 +63,28 @@ function transpile(code, filename = '') {
     // Remove side-effect imports
     transpiled = transpiled.replace(/import\s+['"].*?['"]/g, '')
     
-    // Remove other imports (default, etc - not fully supported yet based on requirements, but cleaning up)
+    // Remove other imports
     transpiled = transpiled.replace(/import\s+.*?from\s+['"].*?['"]/g, '')
 
     // 2. Handle Exports
-    // export const X = ... -> window.X = ...
+    // ... (existing export logic) ...
     transpiled = transpiled.replace(/export\s+const\s+(\w+)/g, 'window.$1')
     transpiled = transpiled.replace(/export\s+var\s+(\w+)/g, 'window.$1')
     transpiled = transpiled.replace(/export\s+let\s+(\w+)/g, 'window.$1')
     
-    // export function X ... -> window.X = function X ...
     transpiled = transpiled.replace(/export\s+function\s+(\w+)/g, 'window.$1 = function $1')
     
-    // export class X ... -> window.X = class X ...
     transpiled = transpiled.replace(/export\s+class\s+(\w+)/g, 'window.$1 = class $1')
     
-    // export default X -> window.default = X (or similar)
+    if (/export\s+default\s+\{/.test(transpiled)) {
+        transpiled = transpiled.replace(/export\s+default\s+\{/, 'var __ltng_default_export = {')
+        transpiled += '\nObject.assign(window, __ltng_default_export);'
+    }
+
     transpiled = transpiled.replace(/export\s+default\s+(\w+)/g, 'window.default = $1')
     
-    // export { X } -> window.X = X
     transpiled = transpiled.replace(/export\s+\{([\s\S]*?)\}/g, (match, exports) => {
+        // ... (existing export logic) ...
         return exports.split(',').map(part => {
             part = part.trim()
             if (!part) return ''
@@ -105,13 +97,16 @@ function transpile(code, filename = '') {
         }).join('\n')
     })
 
-    // export * from '...' -> remove (handled by dependency loader)
     transpiled = transpiled.replace(/export\s+\*\s+from\s+['"].*?['"]/g, '')
 
+    // Optional: Strip loadCSS calls (for minified bundles where assets are manually handled)
+    if (options.stripLoadCSS) {
+        // Matches: window.loadCSS(new URL(..., import.meta.url).href)
+        transpiled = transpiled.replace(/window\.loadCSS\(new URL\(.*?, import\.meta\.url\)\.href\)/g, '')
+    }
+
     // Handle import.meta
-    // Mock import.meta.url with a file URL based on filename
-    // We need to be careful not to break strings, but simple replace should work for now.
-    transpiled = transpiled.replace(/import\.meta/g, `({ url: 'file:///${filename}' })`)
+    transpiled = transpiled.replace(/import\.meta/g, `({ url: window.location.origin + '/mock/${filename}' })`)
 
     return transpiled
 }

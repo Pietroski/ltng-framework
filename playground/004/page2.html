@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>ltng-framework Page 2</title>
+	<script src="./theme.js"></script>
+	<style>
+		body {
+			font-family: sans-serif;
+			padding: 20px;
+		}
+
+		.container {
+			border: 1px solid #ccc;
+			padding: 20px;
+			border-radius: 8px;
+		}
+	</style>
+	<link rel="stylesheet" href="./ltng-components/styles/theme.css" />
+	<link rel="stylesheet" href="./ltng-components/button/button.css" />
+	<link rel="stylesheet" href="./ltng-components/card/card.css" />
+	<link rel="stylesheet" href="./ltng-components/container/containers.css" />
+	<link rel="stylesheet" href="./ltng-components/footer/footer.css" />
+	<link rel="stylesheet" href="./ltng-components/form/form.css" />
+	<link rel="stylesheet" href="./ltng-components/input/input.css" />
+	<link rel="stylesheet" href="./ltng-components/modal/modal.css" />
+	<link rel="stylesheet" href="./ltng-components/typography/typography.css" />
+	<link rel="stylesheet" href="./ltng-components/toast/toast.css" />
+</head>
+
+<body>
+	<!-- Load Minified Bundle -->
+	<script src="../../build/ltng-framework-all.min.js"></script>
+
+	<script>
+		// Access globals exposed by the bundle
+		const LTNGDiv = window.Div;
+		const LTNGButton = window.Button;
+
+		// Initialize the SAME store with the SAME persist key
+		const themeStore = createStore({}, { persist: 'ltng_theme' })
+		themeStore.subscribe(setTheme)
+
+		Body.render(
+			LTNGDiv({ class: 'container' },
+				h1({}, 'Page 2'),
+				p({}, 'This page shares the same context (theme) as the home page via localStorage.'),
+				LTNGDiv({ style: 'margin-top: 20px;' },
+					LTNGButton({
+						onClick: () => themeStore.setState({ dark: !themeStore.getState().dark }),
+						style: 'padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;'
+					}, 'Toggle Theme Here')
+				),
+				LTNGDiv({ style: 'margin-top: 20px;' },
+					a({ href: 'index.html', style: 'color: #007bff;' }, 'Back to Home')
+				)
+			)
+		)
+	</script>
+</body>
+
+</html>

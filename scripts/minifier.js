@@ -108,7 +108,7 @@ async function build() {
             // but wrapping it is fine too if it assigns to window.
             // However, ltng-framework.js has `window.X = ...` directly.
             
-            const transpiled = transpile(content, path.basename(file))
+            const transpiled = transpile(content, path.basename(file), { stripLoadCSS: true })
             bundleContent += `// File: ${path.basename(file)}\n(function(){\n${transpiled}\n})();\n`
         }
         

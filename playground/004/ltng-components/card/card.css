@@ -1,0 +1,39 @@
+.ltng-card {
+    width: 250px;
+    height: 150px;
+    position: relative;
+    border-radius: 15px;
+    border: 1px solid var(--ltng-color-primary);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.ltng-card--dark {
+    background-color: #333;
+    color: white;
+}
+
+.ltng-card--light {
+    background-color: whitesmoke;
+    color: black;
+}
+
+.ltng-card-close-btn {
+    width: 35px;
+    height: 35px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-radius: 15px;
+    border: 1px solid var(--ltng-color-primary);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: transparent;
+    color: inherit;
+}

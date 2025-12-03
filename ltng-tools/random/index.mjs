@@ -1,7 +1,2 @@
-import number from './number.mjs'
-import string from './string.mjs'
-
-export default {
-	...number,
-	...string
-}
+export * from './number.mjs'
+export * from './string.mjs'
