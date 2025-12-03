@@ -1,3 +1,5 @@
+// TODO: TO DEPRECATE - WRITE A NEW ONE FROM SCRATCH!!
+
 /**
 * ltng-server.js
 * A zero-dependency SSR/SSG server for ltng-framework.
@@ -11,7 +13,7 @@ const http = require('http')
 const fs = require('fs')
 const path = require('path')
 const vm = require('vm')
-const mockDom = require('./mock-dom')
+const mockDom = require('../mocks/mock-dom')
 
 
 // Helper to render a file
