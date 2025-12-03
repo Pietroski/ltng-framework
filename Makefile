@@ -1,10 +1,15 @@
 # Main Makefile
 
 check-ltng-testingtools:
-	node ltng-testingtools/verify.test.js
+	node ltng-testingtools/index.test.mjs
 
 test-ltng-tools:
-	node ltng-tools/verify.test.js
+	node ltng-tools/index.test.mjs
+
+# Test ltng-tools folder
+tf ?= converter
+test-ltng-tools-folder:
+	node ltng-tools/$(tf)/index.test.mjs
 
 pv ?= 001 # playground_version
 port ?= 3000
