@@ -3,7 +3,7 @@ const path = require('path')
 const { transpile, minify } = require('./internal/transpiler')
 
 const ROOT_DIR = path.resolve(__dirname, '..')
-const DIST_DIR = path.join(ROOT_DIR, 'dist')
+const DIST_DIR = path.join(ROOT_DIR, 'build')
 
 // Ensure dist directory exists
 if (!fs.existsSync(DIST_DIR)) {
