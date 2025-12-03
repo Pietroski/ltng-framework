@@ -106,7 +106,15 @@ function transpile(code, filename = '', options = {}) {
     }
 
     // Handle import.meta
-    transpiled = transpiled.replace(/import\.meta/g, `({ url: window.location.origin + '/mock/${filename}' })`)
+    // Use file:// URL so that URL resolution works correctly in SSR
+    // and ssr.js can rewrite file:// URLs to server paths.
+    if (filename && filename !== 'inline') {
+        const fileUrl = 'file://' + (filename.startsWith('/') ? '' : '/') + filename
+        transpiled = transpiled.replace(/import\.meta/g, `({ url: '${fileUrl}' })`)
+    } else {
+        // Fallback for inline or missing filename
+        transpiled = transpiled.replace(/import\.meta/g, `({ url: 'file:///unknown' })`)
+    }
 
     return transpiled
 }
