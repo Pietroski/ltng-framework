@@ -24,7 +24,7 @@ playground-ssg:
 	node scripts/ltng-server.js --src=playground/$(pv) --dist=dist/playground/$(pv) --build --mode=ssg
 	node scripts/ltng-server.js --src=playground/$(pv) --dist=dist/playground/$(pv) --port=$(port) --mode=ssg
 
-build:
+minify:
 	node scripts/minifier.js
 
 ltng-book:
