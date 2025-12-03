@@ -99,6 +99,26 @@ class HTMLHeadElement extends HTMLElement {
 	}
 }
 
+class HTMLLinkElement extends HTMLElement {
+    constructor() {
+        super('link')
+    }
+    
+    set href(val) {
+        this.setAttribute('href', val)
+    }
+    get href() {
+        return this.getAttribute('href')
+    }
+    
+    set rel(val) {
+        this.setAttribute('rel', val)
+    }
+    get rel() {
+        return this.getAttribute('rel')
+    }
+}
+
 class HTMLUnknownElement extends HTMLElement {
 	constructor(tagName) {
 		super(tagName)
@@ -114,6 +134,7 @@ class Document {
 
 	createElement(tagName) {
 		if (tagName.toLowerCase() === 'body') return this.body
+        if (tagName.toLowerCase() === 'link') return new HTMLLinkElement()
 		// For known tags, we could return specific classes, but HTMLElement is fine.
 		// For unknown, technically HTMLUnknownElement, but for this mock, HTMLElement is sufficient.
 		// However, the framework extends HTMLUnknownElement.prototype, so we need it.
@@ -191,5 +212,6 @@ module.exports = {
 	HTMLBodyElement,
 	HTMLUnknownElement,
 	Node,
-	TextNode
+	TextNode,
+    HTMLLinkElement
 }
