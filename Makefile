@@ -38,4 +38,16 @@ bundle-server:
 	npx esbuild scripts/ltng-server.js --bundle --platform=node --outfile=build/ltng-server.min.js --minify
 
 bundle-ltng-framework:
-	npx esbuild ltng-framework.js --bundle --platform=node --outfile=build/ltng-framework.esbuild.min.js --minify
+	npx esbuild ltng-framework.js --bundle --platform=node --outfile=build/ltng-framework.esbuild.min.js --minify --format=esm
+
+bundle-ltng-components:
+	npx esbuild ltng-components/index.mjs --bundle --platform=node --outfile=build/ltng-components.esbuild.min.js --minify --format=esm
+
+bundle-ltng-testingtools:
+	npx esbuild ltng-testingtools/index.mjs --bundle --platform=node --outfile=build/ltng-testingtools.esbuild.min.js --minify --format=esm
+
+bundle-ltng-tools:
+	npx esbuild ltng-tools/index.mjs --bundle --platform=node --outfile=build/ltng-tools.esbuild.min.js --minify --format=esm
+
+bundle-all:
+	npx esbuild imports.js --bundle --platform=node --outfile=build/ltng-framework-all.esbuild.min.js --minify --format=esm

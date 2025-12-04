@@ -134,6 +134,14 @@ async function run() {
 	}
 }
 
+export {
+	Feature,
+	Given,
+	When,
+	Then,
+	run,
+}
+
 export default {
 	Feature,
 	Given,
