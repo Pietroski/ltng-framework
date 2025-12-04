@@ -33,3 +33,9 @@ ltng-book:
 ltng-book-ssg:
 	node scripts/ltng-server.js --src=pkg/ltng-book --dist=dist/ltng-book --build --mode=ssg
 	node scripts/ltng-server.js --src=pkg/ltng-book --dist=dist/ltng-book --port=$(port) --mode=ssg
+
+bundle-server:
+	npx esbuild scripts/ltng-server.js --bundle --platform=node --outfile=build/ltng-server.min.js --minify
+
+bundle-ltng-framework:
+	npx esbuild ltng-framework.js --bundle --platform=node --outfile=build/ltng-framework.esbuild.min.js --minify
