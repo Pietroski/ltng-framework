@@ -5,59 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b392ae18-9532-4836-8391-68e3d617a675" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/app.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/internal/ltng-book/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/button.story.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/card.story.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/containers.story.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/footer.story.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/form.story.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/input.story.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/modal.story.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/registry.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/toast.story.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/ltng-book/stories/typography.story.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-components/button/button.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-components/card/card.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-components/container/containers.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-components/footer/footer.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-components/form/form.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-components/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-components/input/input.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-components/modal/modal.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-components/toast/toast.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-components/typography/typography.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-testingtools/colours.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-testingtools/gherkin-test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-testingtools/gotest.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-testingtools/verify.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/converter/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/converter/objects.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/converter/objects.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/converter/strings.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/converter/strings.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/converter/style.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/converter/style.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/converter/verify.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/internationalisation/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/internationalisation/index.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/internationalisation/verify.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/random/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/random/number.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/random/number.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/random/string.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/random/string.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/random/verify.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/transport/http/client.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/transport/http/client.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/transport/http/models.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/transport/http/verify.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/transport/index.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/transport/verify.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ltng-tools/verify.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/playground/002/page2.html" beforeDir="false" afterPath="$PROJECT_DIR$/playground/002/page2.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,7 +60,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1764690857306</updated>
-      <workItem from="1764690858534" duration="4074000" />
+      <workItem from="1764690858534" duration="7063000" />
     </task>
     <servers />
   </component>
