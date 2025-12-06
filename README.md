@@ -1,6 +1,74 @@
 # LTNG-Framework
 
-# Prompt
+A lightweight, vanilla JavaScript framework for modern web development. It focuses on simplicity, modularity, and understanding the core of web technologies without heavy abstractions.
+
+## Core Features
+
+The core framework (`ltng-framework.js`) provides essential utilities for building reactive applications:
+
+- **Reactive Rendering**: Efficient DOM updates with `render()` and auto-hydration.
+- **State Management**: Built-in global state store via `createStore(initialState, options)`.
+- **Component System**: Function-based components with props and children.
+- **DOM Utilities**:
+    - `createElement(tag, props, ...children)`
+    - `div`, `span`, `button`, etc. - Global aliases for common HTML tags.
+    - `Body` alias for `document.body`.
+    - `loadCSS(href)` helper.
+    - `generateUUIDv7()` generator.
+- **Built-in UI**: Simple `overlayModal` implementation.
+
+## Ecosystem
+
+The framework is composed of several modular sub-projects:
+
+### [ltng-components](ltng-components/README.md)
+A rich set of functional UI components (Buttons, Cards, Forms, etc.) ready to use.
+
+### [ltng-tools](ltng-tools/README.md)
+Utility libraries for:
+- **Converter**: String/Object case conversion.
+- **Internationalisation**: Simple dictionary-based i18n.
+- **Random**: Random data generation.
+- **Transport**: HTTP client wrapper.
+
+### [ltng-testingtools](ltng-testingtools/README.md)
+Dual-mode testing library supporting:
+- **Go-style**: `gotest.Test("Name", t => ...)`
+- **Gherkin-style**: `Feature`, `Scenario`, `Given/When/Then`.
+
+### [ltng-book](ltng-book/README.md)
+A component documentation and development tool (similar to Storybook).
+
+### [ltng-server](scripts/server/README.md)
+CLI tool for distribution and serving:
+- **CSR**: Client-Side Rendering
+- **SSR**: Server-Side Rendering
+- **SSG**: Static Site Generation
+
+## Quick Start
+
+1. **Install dependencies** (if any, primarily pure JS).
+2. **Run the Playground**:
+   ```bash
+   make playground-csr
+   ```
+   Or using the server script directly:
+   ```bash
+   node scripts/ltng-server.js --src=playground/001 --mode=csr --port=3000
+   ```
+
+## Development
+
+### Project Structure
+- `ltng-framework.js`: Core framework logic.
+- `ltng-*/`: Sub-packages.
+- `scripts/`: Build and server scripts.
+- `playground/`: Example applications.
+- `docs/`: Requirements and documentation.
+
+---
+
+## Meta / Prompting Strategy
 
 For an efficient Artificial Inteligence Driven Project (AIDP) a good prompt is a must have.
 
