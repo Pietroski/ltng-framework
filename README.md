@@ -1,5 +1,12 @@
 # LTNG-Framework
 
+## Documentation Index
+- **[Component Library](ltng-components/README.md)**: UI components (Buttons, Forms, Modals).
+- **[Testing Tools](ltng-testingtools/README.md)**: Go-style and Gherkin-style testing.
+- **[Tooling & Utils](ltng-tools/README.md)**: Helpers for i18n, transport, random data.
+- **[Component Book](ltng-book/README.md)**: Component development environment.
+- **[Server & CLI](scripts/server/README.md)**: `ltng-server` usage (CSR, SSR, SSG).
+
 A lightweight, vanilla JavaScript framework for modern web development. It focuses on simplicity, modularity, and understanding the core of web technologies without heavy abstractions.
 
 ## Core Features
