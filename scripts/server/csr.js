@@ -7,11 +7,12 @@ function handleCSR(req, res, config) {
     let url = req.url === '/' ? '/index.html' : req.url
     
     // Security check: prevent directory traversal
-    if (url.includes('..')) {
-        res.writeHead(403)
-        res.end('Forbidden')
-        return
-    }
+    // REMOVED for flexibility as per user request to serve relative paths outside root
+    // if (url.includes('..')) {
+    //     res.writeHead(403)
+    //     res.end('Forbidden')
+    //     return
+    // }
 
     let filePath = path.join(srcDir, url)
     
@@ -25,6 +26,19 @@ function handleCSR(req, res, config) {
         const potentialRootPath = path.join(rootDir, url)
         if (fs.existsSync(potentialRootPath)) {
             filePath = potentialRootPath
+        } else {
+            // New Fallback: Search Upwards
+            // If the browser requested /ltng-framework/..., it means we might need to look in ../ltng-framework relative to root.
+            // We'll search up to 3 levels up.
+            let currentSearchDir = rootDir
+            for (let i = 0; i < 3; i++) {
+                currentSearchDir = path.join(currentSearchDir, '..')
+                const potentialPath = path.join(currentSearchDir, url)
+                if (fs.existsSync(potentialPath)) {
+                    filePath = potentialPath
+                    break
+                }
+            }
         }
     }
 

@@ -27,6 +27,9 @@ playground-ssg:
 minify:
 	node scripts/minifier.js
 
+bundle:
+	node scripts/build-bundle.js
+
 ltng-book:
 	node scripts/ltng-server.js --src=pkg/ltng-book --dist=dist/ltng-book --port=$(port) --mode=csr
 
@@ -50,4 +53,4 @@ bundle-ltng-tools:
 	npx esbuild ltng-tools/index.mjs --bundle --platform=node --outfile=build/ltng-tools.esbuild.min.js --minify --format=esm
 
 bundle-all:
-	npx esbuild imports.js --bundle --platform=node --outfile=build/ltng-framework-all.esbuild.min.js --minify --format=esm
+	npx esbuild build/modules/exports.js --bundle --platform=node --outfile=build/ltng-framework-all.esbuild.min.js --minify --format=esm

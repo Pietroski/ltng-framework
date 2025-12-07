@@ -107,12 +107,6 @@ async function run() {
 	}
 }
 
-export {
-	Test,
-	Group,
-	run,
-}
-
 export default {
 	Test,
 	Group,

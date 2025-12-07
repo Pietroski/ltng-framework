@@ -39,85 +39,99 @@ function resolvePath(basePath, importPath, importMap = {}) {
  */
 function transpile(code, filename = '', options = {}) {
     let transpiled = code
+    const scope = options.scope || 'window'
 
     // 1. Handle Imports
-    // ... (existing import logic) ...
-    const importRegex = /import\s+\{([\s\S]*?)\}\s+from\s+['"](.*?)['"]/g
-    transpiled = transpiled.replace(importRegex, (match, imports, source) => {
-        // ... (existing assignment logic) ...
-        const assignments = imports.split(',').map(part => {
-            part = part.trim()
-            if (!part) return ''
-            
-            if (part.includes(' as ')) {
-                const [original, alias] = part.split(' as ').map(s => s.trim())
-                return `var ${alias} = window.${original};`
-            } else {
-                return `var ${part} = window.${part};`
-            }
-        }).filter(Boolean).join('\n')
-        
-        return assignments
-    })
-
-    // Remove side-effect imports
-    transpiled = transpiled.replace(/import\s+['"].*?['"]/g, '')
-    
-    // Remove other imports
-    transpiled = transpiled.replace(/import\s+.*?from\s+['"].*?['"]/g, '')
+    // ... (existing import logic, slightly modified to use scope if needed, but imports usually assign to local vars)
+    // Actually existing logic assigns imports to window?
+    // "var ${alias} = window.${original};"
+    // We should probably change this to `var ${alias} = ${scope}.${original};` if we are bundling packages?
+    // But for now let's focus on Exports.
 
     // 2. Handle Exports
-    // ... (existing export logic) ...
-    transpiled = transpiled.replace(/export\s+const\s+(\w+)/g, 'window.$1')
-    transpiled = transpiled.replace(/export\s+var\s+(\w+)/g, 'window.$1')
-    transpiled = transpiled.replace(/export\s+let\s+(\w+)/g, 'window.$1')
+    // export const/var/let
+    // We convert all to 'var' to allow assignment chaining: var x = window.x = scope.x = val
+    // This ensures global availability even when scoped.
+    transpiled = transpiled.replace(/export\s+(const|var|let)\s+(\w+)/g, `var $2 = window.$2 = ${scope}.$2`)
     
-    transpiled = transpiled.replace(/export\s+function\s+(\w+)/g, 'window.$1 = function $1')
+
+    // export function
+    transpiled = transpiled.replace(/export\s+function\s+(\w+)/g, `window.$1 = ${scope}.$1 = function $1`)
     
-    transpiled = transpiled.replace(/export\s+class\s+(\w+)/g, 'window.$1 = class $1')
+    // export class
+    transpiled = transpiled.replace(/export\s+class\s+(\w+)/g, `window.$1 = ${scope}.$1 = class $1`)
     
+    // export default {} 
     if (/export\s+default\s+\{/.test(transpiled)) {
         transpiled = transpiled.replace(/export\s+default\s+\{/, 'var __ltng_default_export = {')
-        transpiled += '\nObject.assign(window, __ltng_default_export);'
+        transpiled += `\nObject.assign(${scope}, __ltng_default_export);\nObject.assign(window, __ltng_default_export);`
     }
 
-    transpiled = transpiled.replace(/export\s+default\s+(\w+)/g, 'window.default = $1')
+    // export default Identifier
+    transpiled = transpiled.replace(/export\s+default\s+(\w+)/g, `window.default = ${scope}.default = $1`)
     
+    // export { x, y as z }
     transpiled = transpiled.replace(/export\s+\{([\s\S]*?)\}/g, (match, exports) => {
-        // ... (existing export logic) ...
         return exports.split(',').map(part => {
             part = part.trim()
             if (!part) return ''
+            // Handle comments inside existing export blocks? Regex might be fragile but let's assume standard format
             if (part.includes(' as ')) {
                 const [original, alias] = part.split(' as ').map(s => s.trim())
-                return `window.${alias} = ${original};`
+                return `window.${alias} = ${scope}.${alias} = ${original};`
             } else {
-                return `window.${part} = ${part};`
+                return `window.${part} = ${scope}.${part} = ${part};`
             }
         }).join('\n')
     })
-
+    
+    // Remove export * from ... (should be handled by bundler logic or ignored)
     transpiled = transpiled.replace(/export\s+\*\s+from\s+['"].*?['"]/g, '')
 
-    // Optional: Strip loadCSS calls (for minified bundles where assets are manually handled)
+    // ... imports handling ...
+    // The existing import handling replaces imports with var assignments from window.
+    // We should make that configurable too? 
+    // "var ${alias} = window.${original};"
+    
+    const importScope = options.importScope || 'window'
+    
+    const importRegex = /import\s+\{([\s\S]*?)\}\s+from\s+['"](.*?)['"]/g
+    transpiled = transpiled.replace(importRegex, (match, imports, source) => {
+         const assignments = imports.split(',').map(part => {
+            part = part.trim()
+            if (!part) return ''
+            if (part.includes(' as ')) {
+                const [original, alias] = part.split(' as ').map(s => s.trim())
+                return `var ${alias} = ${importScope}.${original};`
+            } else {
+                return `var ${part} = ${importScope}.${part};`
+            }
+        }).filter(Boolean).join('\n')
+        return assignments
+    })
+
+
+    // Remove plain imports
+    transpiled = transpiled.replace(/import\s+['"].*?['"]/g, '')
+    transpiled = transpiled.replace(/import\s+.*?from\s+['"].*?['"]/g, '')
+
+    // ... loadCSS stripping ...
     if (options.stripLoadCSS) {
-        // Matches: window.loadCSS(new URL(..., import.meta.url).href)
         transpiled = transpiled.replace(/window\.loadCSS\(new URL\(.*?, import\.meta\.url\)\.href\)/g, '')
+         // Also match scope.loadCSS if scope != window? No, loadCSS is usually global.
     }
 
     // Handle import.meta
-    // Use file:// URL so that URL resolution works correctly in SSR
-    // and ssr.js can rewrite file:// URLs to server paths.
     if (filename && filename !== 'inline') {
         const fileUrl = 'file://' + (filename.startsWith('/') ? '' : '/') + filename
         transpiled = transpiled.replace(/import\.meta/g, `({ url: '${fileUrl}' })`)
     } else {
-        // Fallback for inline or missing filename
         transpiled = transpiled.replace(/import\.meta/g, `({ url: 'file:///unknown' })`)
     }
 
     return transpiled
 }
+
 
 /**
  * Minifies code by removing comments and whitespace.

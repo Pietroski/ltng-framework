@@ -218,6 +218,12 @@ function handleSSR(req, res, config) {
                         const absolutePath = path.normalize(urlObj.pathname)
                         
                         // Check if inside srcDir
+                        // MODIFIED: We now allow serving from anywhere relative to root
+                        const rel = path.relative(rootDir, absolutePath)
+                        return `"${rel.startsWith('/') || rel.startsWith('..') ? rel : '/' + rel}"`
+                        
+                        /* 
+                        // Old Logic
                         if (absolutePath.startsWith(srcDir)) {
                             const rel = path.relative(srcDir, absolutePath)
                             return `"${rel.startsWith('/') ? rel : '/' + rel}"`
@@ -228,6 +234,7 @@ function handleSSR(req, res, config) {
                             const rel = path.relative(rootDir, absolutePath)
                             return `"${rel.startsWith('/') ? rel : '/' + rel}"`
                         }
+                        */
                         
                         return match
                     } catch (e) {

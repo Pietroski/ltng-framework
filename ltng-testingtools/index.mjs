@@ -1,3 +1,3 @@
-export * from './gotest.mjs'
-export * from './gherkin-test.mjs'
+export * as ltng_test from './ltng-test.mjs'
+export * as gherkin_test from './gherkin-test.mjs'
 export * from './colours.mjs'
