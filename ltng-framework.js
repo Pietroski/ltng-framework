@@ -136,7 +136,16 @@ function createElement(tag, props, ...children) {
 const tags = [
 	'div', 'span', 'header', 'footer', 'main', 'section', 'article',
 	'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a', 'button', 'input',
-	'label', 'ul', 'ol', 'li', 'img', 'form', 'nav'
+	'label', 'ul', 'ol', 'li', 'img', 'form', 'nav',
+	// Form elements
+	'select', 'option', 'optgroup', 'textarea', 'fieldset', 'legend',
+	// Table elements
+	'table', 'thead', 'tbody', 'tfoot', 'tr', 'th', 'td',
+	// Other common elements
+	'strong', 'em', 'b', 'i', 'u', 'code', 'pre', 'blockquote', 'hr', 'br',
+	'canvas', 'video', 'audio', 'source', 'iframe', 'object', 'embed',
+	'details', 'summary', 'dialog', 'menu', 'menuitem',
+	'aside', 'figure', 'figcaption', 'address', 'time', 'mark', 'small'
 ]
 
 tags.forEach(tagName => {
