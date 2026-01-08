@@ -24,6 +24,18 @@ playground-ssg:
 	node scripts/ltng-server.js --src=playground/$(pv) --dist=dist/playground/$(pv) --build --mode=ssg
 	node scripts/ltng-server.js --src=playground/$(pv) --dist=dist/playground/$(pv) --port=$(port) --mode=ssg
 
+example_name ?= state-control-across-multiple-html-pages
+
+example-csr:
+	node scripts/ltng-server.js --src=examples/$(example_name) --dist=dist/examples/$(example_name) --port=$(port) --mode=csr
+
+example-ssr:
+	node scripts/ltng-server.js --src=examples/$(example_name) --dist=dist/examples/$(example_name) --port=$(port) --mode=ssr
+
+example-ssg:
+	node scripts/ltng-server.js --src=examples/$(example_name) --dist=dist/examples/$(example_name) --build --mode=ssg
+	node scripts/ltng-server.js --src=examples/$(example_name) --dist=dist/examples/$(example_name) --port=$(port) --mode=ssg
+
 minify:
 	node scripts/minifier.js
 

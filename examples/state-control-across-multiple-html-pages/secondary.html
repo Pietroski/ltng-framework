@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>State Control Across Multiple HTML Pages</title>
+
+	<script src="../../ltng-framework.js"></script>
+</head>
+<body>
+    <script>
+		globalStore = createStore({ }, { persist: 'globalStore' })
+
+        Body.render(
+			div({ class: "container" },
+				h1({}, "State Control Across Multiple HTML Pages"),
+				p({}, "This is a simple example of how to control state across multiple HTML pages."),
+				button({ onClick: () => window.location.href = "index.html" }, "Go to Primary Page"),
+
+				button({ onClick: () => globalStore.setState({ name: "Global Store" }) }, "Set Name"),
+				button({ onClick: () => globalStore.setState({ count: globalStore.getState().count + 1 }) }, "Increment Count"),
+				p({}, ''),
+				p({}, reactive(globalStore, 'count'))
+			)
+		)
+    </script>
+</body>
+</html>

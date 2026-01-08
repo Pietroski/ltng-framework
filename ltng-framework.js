@@ -180,10 +180,10 @@ window.overlayModal = (props, content) => {
 	Body.render(overlay)
 }
 
-// State Management
+// State Management with Selective Subscriptions
 window.createStore = (initialState, options = {}) => {
 	let state = initialState
-	const listeners = new Set()
+	const listeners = new Map() // Map allows storing { callback, keys } with unique Symbol keys
 	const persistKey = options.persist
 
 	// Load from localStorage if persist option is set
@@ -201,20 +201,155 @@ window.createStore = (initialState, options = {}) => {
 	const getState = () => state
 
 	const setState = (partialState) => {
+		const prevState = state
 		state = { ...state, ...partialState }
+
 		if (persistKey) {
 			localStorage.setItem(persistKey, JSON.stringify(state))
 		}
-		listeners.forEach(listener => listener(state))
+
+		// Get the keys that were actually changed
+		const changedKeys = Object.keys(partialState).filter(
+			key => prevState[key] !== state[key]
+		)
+
+		// Only notify listeners whose watched keys intersect with changed keys
+		listeners.forEach(({ callback, keys }) => {
+			if (!keys || keys.length === 0 || keys.some(k => changedKeys.includes(k))) {
+				callback(state)
+			}
+		})
 	}
 
-	const subscribe = (listener) => {
-		listeners.add(listener)
+	// Enhanced subscribe: pass an array of keys to watch, or omit for all changes
+	const subscribe = (listener, keys = null) => {
+		const id = Symbol()
+		listeners.set(id, { callback: listener, keys })
 		// Call listener immediately with current state
 		listener(state)
 		// Return unsubscribe function
-		return () => listeners.delete(listener)
+		return () => listeners.delete(id)
 	}
 
 	return { getState, setState, subscribe }
+}
+
+/**
+ * Creates a reactive text node that auto-updates when the specified store key changes.
+ * Only works with text-based values (strings, numbers).
+ * 
+ * @param {Object} store - The store created by createStore()
+ * @param {string} key - The state key to watch
+ * @returns {Text} A text node that updates automatically
+ * 
+ * @example
+ * // Display count that updates automatically
+ * p({ id: "counter" }, "Count: ", reactive(globalStore, 'count'))
+ * 
+ * // Display user name
+ * span({}, "Hello, ", reactive(userStore, 'name'))
+ */
+window.reactive = (store, key) => {
+	const node = document.createTextNode(store.getState()[key])
+	
+	store.subscribe((state) => {
+		node.textContent = state[key]
+	}, [key])
+
+	return node
+}
+
+/**
+ * Creates a reactive element that replaces itself when the specified store key changes.
+ * Use for complex values like arrays or objects that need full re-rendering.
+ * 
+ * @param {Object} store - The store created by createStore()
+ * @param {string} key - The state key to watch
+ * @param {Function} renderFn - Function that receives the value and returns an element
+ * @returns {Element} An element that replaces itself on updates
+ * 
+ * @example
+ * // Reactive list that re-renders when items change
+ * reactiveElement(globalStore, 'items', (items) => 
+ *     ul({}, ...items.map(item => li({}, item.name)))
+ * )
+ * 
+ * // Reactive user card
+ * reactiveElement(userStore, 'user', (user) =>
+ *     div({ class: 'card' },
+ *         h2({}, user.name),
+ *         p({}, user.email)
+ *     )
+ * )
+ */
+window.reactiveElement = (store, key, renderFn) => {
+	let currentEl = renderFn(store.getState()[key])
+	
+	store.subscribe((state) => {
+		const newEl = renderFn(state[key])
+		currentEl.replaceWith(newEl)
+		currentEl = newEl
+	}, [key])
+	
+	return currentEl
+}
+
+/**
+ * Makes an element's attribute reactive to store changes.
+ * Returns the element for chaining.
+ * 
+ * @param {Element} element - The element to modify
+ * @param {string} attr - The attribute name to update
+ * @param {Object} store - The store created by createStore()
+ * @param {string} key - The state key to watch
+ * @returns {Element} The same element (for chaining)
+ * 
+ * @example
+ * // Reactive CSS class based on theme
+ * reactiveAttr(div({}, "Content"), 'class', themeStore, 'className')
+ * 
+ * // Reactive disabled state
+ * reactiveAttr(button({}, "Submit"), 'disabled', formStore, 'isSubmitting')
+ * 
+ * // Reactive href
+ * reactiveAttr(a({}, "Go"), 'href', navStore, 'currentUrl')
+ */
+window.reactiveAttr = (element, attr, store, key) => {
+	element.setAttribute(attr, store.getState()[key])
+	
+	store.subscribe((state) => {
+		element.setAttribute(attr, state[key])
+	}, [key])
+	
+	return element
+}
+
+/**
+ * Makes an element's style property reactive to store changes.
+ * Returns the element for chaining.
+ * 
+ * @param {Element} element - The element to modify
+ * @param {string} prop - The CSS property name (camelCase, e.g., 'backgroundColor')
+ * @param {Object} store - The store created by createStore()
+ * @param {string} key - The state key to watch
+ * @returns {Element} The same element (for chaining)
+ * 
+ * @example
+ * // Reactive background color
+ * reactiveStyle(div({}, "Box"), 'backgroundColor', themeStore, 'bgColor')
+ * 
+ * // Reactive width
+ * reactiveStyle(div({}, "Progress"), 'width', progressStore, 'percentage')
+ * 
+ * // Reactive visibility
+ * reactiveStyle(modal({}), 'display', uiStore, 'modalDisplay')
+ */
+window.reactiveStyle = (element, prop, store, key) => {
+	element.style[prop] = store.getState()[key]
+	
+	store.subscribe((state) => {
+		element.style[prop] = state[key]
+	}, [key])
+	
+	return element
 }

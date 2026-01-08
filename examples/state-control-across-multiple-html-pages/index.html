@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>State Control Across Multiple HTML Pages</title>
+
+	<script src="../../ltng-framework.js"></script>
+</head>
+
+<body>
+	<script>
+		globalStore = createStore({ count: 0, name: "Global Store" }, {persist: 'globalStore'})
+
+		const container = div({ class: "container" },
+			h1({}, "State Control Across Multiple HTML Pages"),
+			p({}, "This is a simple example of how to control state across multiple HTML pages."),
+			button({ onClick: () => window.location.href = "secondary.html" }, "Go to Secondary Page"),
+			p({}, "Global Store State: ", globalStore.getState().count),
+			div({ style: "margin-top: 20px;" },
+				button({ onClick: () => globalStore.setState({ count: globalStore.getState().count + 1 }) }, "Increment"),
+				span({ id: "count" }, globalStore.getState().count),
+				button({ onClick: () => globalStore.setState({ count: globalStore.getState().count - 1 }) }, "Decrement")
+			),
+			button({ onClick: () => globalStore.setState({ name: "Global Store 2" }) }, "Change Name"),
+			p({}, "Global Store Name: ", globalStore.getState().name),
+			button({ onClick: () => globalStore.setState({ count: globalStore.getState().count + 1, name: "Global Store BOTH" }) }, "Change Both!!"),
+			p({ id: "count-p" }, reactive(globalStore, 'count')),
+			p({ id: "name-p" }, reactive(globalStore, 'name'))
+		)
+
+		// globalStore.subscribe(({count}) => {
+		// 	console.log("Global Store State: ", count)
+		// 	container.querySelector("#count").textContent = count
+		// })
+
+		// Only triggers when 'count' changes
+		globalStore.subscribe(({ count }) => {
+			console.log("Count changed:", count)
+			container.querySelector("#count").textContent = count
+		}, ['count'])
+		// Only triggers when 'user' changes
+		globalStore.subscribe(({ name }) => {
+			console.log("Name changed:", name)
+		}, ['name'])
+		// Triggers on ANY change (backward compatible)
+		// globalStore.subscribe((state) => {
+		// 	console.log("Any change:", state)
+		// })
+
+		Body.render(
+			container
+		)
+	</script>
+</body>
+
+</html>
