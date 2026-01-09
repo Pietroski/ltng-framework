@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>LTNG Shop - Cart</title>
+	<link rel="stylesheet" href="styles.css">
+	<script src="../../ltng-framework.js"></script>
+	<script src="store.js"></script>
+</head>
+<body>
+	<script>
+		// Helper to format price based on currency
+		const formatPrice = (price) => {
+			const { currency } = appStore.getState()
+			const rates = { USD: 1, EUR: 0.85, GBP: 0.73 }
+			const symbols = { USD: "$", EUR: "€", GBP: "£" }
+			const converted = (price * rates[currency]).toFixed(2)
+			return `${symbols[currency]}${converted}`
+		}
+
+		// Update quantity handler
+		const updateQuantity = (productId, delta) => {
+			const { cart } = appStore.getState()
+			const newCart = cart
+				.map(item => 
+					item.id === productId 
+						? { ...item, quantity: Math.max(0, item.quantity + delta) }
+						: item
+				)
+				.filter(item => item.quantity > 0)
+			
+			appStore.setState({ cart: newCart })
+		}
+
+		// Remove item handler
+		const removeItem = (productId) => {
+			const { cart } = appStore.getState()
+			appStore.setState({ 
+				cart: cart.filter(item => item.id !== productId),
+				notification: { message: "Item removed from cart", type: "info" }
+			})
+			setTimeout(() => appStore.setState({ notification: null }), 2000)
+		}
+
+		// Clear cart handler
+		const clearCart = () => {
+			appStore.setState({ 
+				cart: [],
+				notification: { message: "Cart cleared", type: "warning" }
+			})
+			setTimeout(() => appStore.setState({ notification: null }), 2000)
+		}
+
+		// Checkout handler
+		const checkout = () => {
+			const { cart } = appStore.getState()
+			if (cart.length === 0) return
+			
+			// Record order in history
+			const { orderHistory } = appStore.getState()
+			const order = {
+				id: Date.now(),
+				items: [...cart],
+				total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+				date: new Date().toISOString()
+			}
+			
+			appStore.setState({ 
+				cart: [],
+				orderHistory: [...orderHistory, order],
+				notification: { message: "Order placed successfully! 🎉", type: "success" }
+			})
+			setTimeout(() => appStore.setState({ notification: null }), 3000)
+		}
+
+		// Cart item component
+		const CartItem = (item) => {
+			return div({ class: "cart-item" },
+				div({ class: "cart-item-image" }, item.image),
+				div({ class: "cart-item-details" },
+					h3({}, item.name),
+					p({ class: "cart-item-price" }, formatPrice(item.price))
+				),
+				div({ class: "cart-item-quantity" },
+					button({ 
+						class: "btn btn-sm",
+						onClick: () => updateQuantity(item.id, -1)
+					}, "−"),
+					span({ class: "quantity" }, item.quantity),
+					button({ 
+						class: "btn btn-sm",
+						onClick: () => updateQuantity(item.id, 1)
+					}, "+")
+				),
+				div({ class: "cart-item-subtotal" },
+					formatPrice(item.price * item.quantity)
+				),
+				button({ 
+					class: "btn btn-danger btn-sm",
+					onClick: () => removeItem(item.id)
+				}, "✕")
+			)
+		}
+
+		// Cart summary component
+		const CartSummary = () => {
+			const { cart } = appStore.getState()
+			const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+			const tax = subtotal * 0.08
+			const total = subtotal + tax
+			
+			return div({ class: "cart-summary" },
+				h3({}, "Order Summary"),
+				div({ class: "summary-row" },
+					span({}, "Subtotal:"),
+					span({ id: "subtotal" }, formatPrice(subtotal))
+				),
+				div({ class: "summary-row" },
+					span({}, "Tax (8%):"),
+					span({ id: "tax" }, formatPrice(tax))
+				),
+				div({ class: "summary-row total" },
+					span({}, "Total:"),
+					span({ id: "total" }, formatPrice(total))
+				),
+				button({ 
+					class: "btn btn-primary btn-lg",
+					onClick: checkout,
+					disabled: cart.length === 0
+				}, "Checkout"),
+				button({ 
+					class: "btn btn-outline",
+					onClick: clearCart,
+					disabled: cart.length === 0
+				}, "Clear Cart")
+			)
+		}
+
+		// Navigation component
+		const Navigation = () => {
+			const cartCount = appStore.getState().cart.reduce((sum, item) => sum + item.quantity, 0)
+			
+			return nav({ class: "navbar" },
+				a({ href: "index.html", class: "nav-brand" }, "🛍️ LTNG Shop"),
+				div({ class: "nav-links" },
+					a({ href: "index.html", class: "nav-link" }, "Products"),
+					a({ href: "cart.html", class: "nav-link active" }, 
+						"Cart ",
+						span({ class: "badge", id: "cart-badge" }, cartCount)
+					),
+					a({ href: "settings.html", class: "nav-link" }, "⚙️ Settings")
+				)
+			)
+		}
+
+		// Notification component
+		const Notification = () => {
+			return div({ id: "notification", class: "notification hidden" })
+		}
+
+		// Empty cart message
+		const EmptyCart = () => {
+			return div({ class: "empty-cart" },
+				p({}, "🛒 Your cart is empty"),
+				a({ href: "index.html", class: "btn btn-primary" }, "Start Shopping")
+			)
+		}
+
+		// Cart items list
+		const CartItems = () => {
+			const { cart } = appStore.getState()
+			if (cart.length === 0) return EmptyCart()
+			
+			return div({ class: "cart-items" },
+				...cart.map(CartItem)
+			)
+		}
+
+		// Order history section
+		const OrderHistory = () => {
+			const { orderHistory } = appStore.getState()
+			if (orderHistory.length === 0) return null
+			
+			return div({ class: "order-history" },
+				h2({}, "Order History"),
+				...orderHistory.slice(-5).reverse().map(order => 
+					div({ class: "order-card" },
+						div({ class: "order-header" },
+							span({}, `Order #${order.id}`),
+							span({}, new Date(order.date).toLocaleDateString())
+						),
+						p({}, `${order.items.length} items - ${formatPrice(order.total)}`)
+					)
+				)
+			)
+		}
+
+		// Main app
+		const App = () => {
+			return div({ id: "app" },
+				Navigation(),
+				Notification(),
+				main({ class: "container" },
+					h1({}, "Shopping Cart"),
+					div({ class: "cart-layout" },
+						div({ id: "cart-items-container" }, CartItems()),
+						div({ id: "cart-summary-container" }, CartSummary())
+					),
+					div({ id: "order-history-container" }, OrderHistory())
+				)
+			)
+		}
+
+		// Render app
+		Body.render(App())
+
+		// Subscribe to cart changes (re-render cart and summary)
+		appStore.subscribe(({ cart }) => {
+			const itemsContainer = document.getElementById("cart-items-container")
+			const summaryContainer = document.getElementById("cart-summary-container")
+			const badge = document.getElementById("cart-badge")
+			
+			if (itemsContainer) {
+				itemsContainer.innerHTML = ""
+				itemsContainer.appendChild(CartItems())
+			}
+			if (summaryContainer) {
+				summaryContainer.innerHTML = ""
+				summaryContainer.appendChild(CartSummary())
+			}
+			if (badge) {
+				badge.textContent = cart.reduce((sum, item) => sum + item.quantity, 0)
+			}
+		}, ['cart'])
+
+		// Subscribe to order history changes
+		appStore.subscribe(({ orderHistory }) => {
+			const container = document.getElementById("order-history-container")
+			if (container) {
+				container.innerHTML = ""
+				const history = OrderHistory()
+				if (history) container.appendChild(history)
+			}
+		}, ['orderHistory'])
+
+		// Subscribe to notifications
+		appStore.subscribe(({ notification }) => {
+			const el = document.getElementById("notification")
+			if (el) {
+				if (notification) {
+					el.textContent = notification.message
+					el.className = `notification ${notification.type}`
+				} else {
+					el.className = "notification hidden"
+				}
+			}
+		}, ['notification'])
+
+		// Subscribe to currency changes (re-render prices)
+		appStore.subscribe(({ currency }) => {
+			const summaryContainer = document.getElementById("cart-summary-container")
+			const itemsContainer = document.getElementById("cart-items-container")
+			if (summaryContainer) {
+				summaryContainer.innerHTML = ""
+				summaryContainer.appendChild(CartSummary())
+			}
+			if (itemsContainer) {
+				itemsContainer.innerHTML = ""
+				itemsContainer.appendChild(CartItems())
+			}
+		}, ['currency'])
+
+		// Subscribe to theme changes
+		appStore.subscribe(({ theme }) => {
+			document.body.className = theme
+		}, ['theme'])
+
+		// Apply initial theme
+		document.body.className = appStore.getState().theme
+	</script>
+</body>
+</html>

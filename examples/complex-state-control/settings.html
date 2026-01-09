@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>LTNG Shop - Settings</title>
+	<link rel="stylesheet" href="styles.css">
+	<script src="../../ltng-framework.js"></script>
+	<script src="store.js"></script>
+</head>
+<body>
+	<script>
+		// Navigation component
+		const Navigation = () => {
+			const cartCount = appStore.getState().cart.reduce((sum, item) => sum + item.quantity, 0)
+			
+			return nav({ class: "navbar" },
+				a({ href: "index.html", class: "nav-brand" }, "🛍️ LTNG Shop"),
+				div({ class: "nav-links" },
+					a({ href: "index.html", class: "nav-link" }, "Products"),
+					a({ href: "cart.html", class: "nav-link" }, 
+						"Cart ",
+						span({ class: "badge", id: "cart-badge" }, cartCount)
+					),
+					a({ href: "settings.html", class: "nav-link active" }, "⚙️ Settings")
+				)
+			)
+		}
+
+		// Notification component
+		const Notification = () => {
+			return div({ id: "notification", class: "notification hidden" })
+		}
+
+		// Theme selector
+		const ThemeSelector = () => {
+			const { theme } = appStore.getState()
+			const themes = ["light", "dark", "ocean", "forest"]
+			
+			return div({ class: "setting-group" },
+				h3({}, "🎨 Theme"),
+				p({ class: "setting-description" }, "Choose your preferred color scheme"),
+				div({ class: "theme-options" },
+					...themes.map(t => 
+						button({
+							class: `theme-btn ${t} ${theme === t ? 'active' : ''}`,
+							onClick: () => {
+								appStore.setState({ theme: t })
+								appStore.setState({ 
+									notification: { message: `Theme changed to ${t}`, type: "success" }
+								})
+								setTimeout(() => appStore.setState({ notification: null }), 2000)
+							}
+						}, t.charAt(0).toUpperCase() + t.slice(1))
+					)
+				)
+			)
+		}
+
+		// Currency selector
+		const CurrencySelector = () => {
+			const { currency } = appStore.getState()
+			const currencies = [
+				{ code: "USD", name: "US Dollar", symbol: "$" },
+				{ code: "EUR", name: "Euro", symbol: "€" },
+				{ code: "GBP", name: "British Pound", symbol: "£" }
+			]
+			
+			return div({ class: "setting-group" },
+				h3({}, "💱 Currency"),
+				p({ class: "setting-description" }, "Select your preferred currency for prices"),
+				div({ class: "currency-options" },
+					...currencies.map(c => 
+						button({
+							class: `currency-btn ${currency === c.code ? 'active' : ''}`,
+							onClick: () => {
+								appStore.setState({ currency: c.code })
+								appStore.setState({ 
+									notification: { message: `Currency changed to ${c.name}`, type: "success" }
+								})
+								setTimeout(() => appStore.setState({ notification: null }), 2000)
+							}
+						}, 
+						span({ class: "currency-symbol" }, c.symbol),
+						span({ class: "currency-name" }, c.name)
+						)
+					)
+				)
+			)
+		}
+
+		// User profile settings
+		const ProfileSettings = () => {
+			const { user } = appStore.getState()
+			
+			return div({ class: "setting-group" },
+				h3({}, "👤 Profile"),
+				p({ class: "setting-description" }, "Manage your profile information"),
+				div({ class: "form-group" },
+					label({ for: "name" }, "Name"),
+					input({
+						type: "text",
+						id: "name",
+						value: user.name,
+						onInput: (e) => {
+							appStore.setState({
+								user: { ...appStore.getState().user, name: e.target.value }
+							})
+						}
+					})
+				),
+				div({ class: "form-group" },
+					label({ for: "email" }, "Email"),
+					input({
+						type: "email",
+						id: "email",
+						value: user.email,
+						onInput: (e) => {
+							appStore.setState({
+								user: { ...appStore.getState().user, email: e.target.value }
+							})
+						}
+					})
+				),
+				p({ class: "profile-preview", id: "profile-preview" }, 
+					`Hello, ${user.name || 'Guest'}!`
+				)
+			)
+		}
+
+		// Notification preferences
+		const NotificationPreferences = () => {
+			const { preferences } = appStore.getState()
+			
+			return div({ class: "setting-group" },
+				h3({}, "🔔 Notifications"),
+				p({ class: "setting-description" }, "Control your notification preferences"),
+				div({ class: "checkbox-group" },
+					label({ class: "checkbox-label" },
+						input({
+							type: "checkbox",
+							checked: preferences.showNotifications,
+							onChange: (e) => {
+								appStore.setState({
+									preferences: { 
+										...appStore.getState().preferences, 
+										showNotifications: e.target.checked 
+									}
+								})
+							}
+						}),
+						span({}, "Show toast notifications")
+					)
+				),
+				div({ class: "checkbox-group" },
+					label({ class: "checkbox-label" },
+						input({
+							type: "checkbox",
+							checked: preferences.soundEnabled,
+							onChange: (e) => {
+								appStore.setState({
+									preferences: { 
+										...appStore.getState().preferences, 
+										soundEnabled: e.target.checked 
+									}
+								})
+							}
+						}),
+						span({}, "Enable sounds")
+					)
+				)
+			)
+		}
+
+		// Data management
+		const DataManagement = () => {
+			return div({ class: "setting-group danger-zone" },
+				h3({}, "⚠️ Data Management"),
+				p({ class: "setting-description" }, "Manage your stored data"),
+				div({ class: "button-group" },
+					button({
+						class: "btn btn-outline",
+						onClick: () => {
+							const state = appStore.getState()
+							const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' })
+							const url = URL.createObjectURL(blob)
+							const a = document.createElement('a')
+							a.href = url
+							a.download = 'ltng-shop-data.json'
+							a.click()
+							URL.revokeObjectURL(url)
+							appStore.setState({ 
+								notification: { message: "Data exported!", type: "success" }
+							})
+							setTimeout(() => appStore.setState({ notification: null }), 2000)
+						}
+					}, "📥 Export Data"),
+					button({
+						class: "btn btn-danger",
+						onClick: () => {
+							if (confirm("Are you sure? This will clear all your data including cart and order history.")) {
+								localStorage.removeItem('ltngShopState')
+								location.reload()
+							}
+						}
+					}, "🗑️ Clear All Data")
+				)
+			)
+		}
+
+		// Stats display
+		const StatsDisplay = () => {
+			const { cart, orderHistory, products } = appStore.getState()
+			const totalOrders = orderHistory.length
+			const totalSpent = orderHistory.reduce((sum, order) => sum + order.total, 0)
+			const cartItems = cart.reduce((sum, item) => sum + item.quantity, 0)
+			
+			return div({ class: "stats-grid" },
+				div({ class: "stat-card" },
+					span({ class: "stat-value", id: "stat-products" }, products.length),
+					span({ class: "stat-label" }, "Products")
+				),
+				div({ class: "stat-card" },
+					span({ class: "stat-value", id: "stat-cart" }, cartItems),
+					span({ class: "stat-label" }, "In Cart")
+				),
+				div({ class: "stat-card" },
+					span({ class: "stat-value", id: "stat-orders" }, totalOrders),
+					span({ class: "stat-label" }, "Orders")
+				),
+				div({ class: "stat-card" },
+					span({ class: "stat-value", id: "stat-spent" }, `$${totalSpent.toFixed(0)}`),
+					span({ class: "stat-label" }, "Total Spent")
+				)
+			)
+		}
+
+		// Main app
+		const App = () => {
+			return div({ id: "app" },
+				Navigation(),
+				Notification(),
+				main({ class: "container" },
+					h1({}, "Settings"),
+					div({ id: "stats-container" }, StatsDisplay()),
+					div({ class: "settings-grid" },
+						div({ id: "theme-container" }, ThemeSelector()),
+						div({ id: "currency-container" }, CurrencySelector()),
+						div({ id: "profile-container" }, ProfileSettings()),
+						div({ id: "notifications-container" }, NotificationPreferences()),
+						div({ id: "data-container" }, DataManagement())
+					)
+				)
+			)
+		}
+
+		// Render app
+		Body.render(App())
+
+		// Subscribe to cart changes (update badge and stats)
+		appStore.subscribe(({ cart }) => {
+			const badge = document.getElementById("cart-badge")
+			const statCart = document.getElementById("stat-cart")
+			const count = cart.reduce((sum, item) => sum + item.quantity, 0)
+			
+			if (badge) badge.textContent = count
+			if (statCart) statCart.textContent = count
+		}, ['cart'])
+
+		// Subscribe to order history changes (update stats)
+		appStore.subscribe(({ orderHistory }) => {
+			const statOrders = document.getElementById("stat-orders")
+			const statSpent = document.getElementById("stat-spent")
+			const totalSpent = orderHistory.reduce((sum, order) => sum + order.total, 0)
+			
+			if (statOrders) statOrders.textContent = orderHistory.length
+			if (statSpent) statSpent.textContent = `$${totalSpent.toFixed(0)}`
+		}, ['orderHistory'])
+
+		// Subscribe to user changes (update profile preview)
+		appStore.subscribe(({ user }) => {
+			const preview = document.getElementById("profile-preview")
+			if (preview) {
+				preview.textContent = `Hello, ${user.name || 'Guest'}!`
+			}
+		}, ['user'])
+
+		// Subscribe to notifications
+		appStore.subscribe(({ notification, preferences }) => {
+			const el = document.getElementById("notification")
+			if (el && preferences.showNotifications) {
+				if (notification) {
+					el.textContent = notification.message
+					el.className = `notification ${notification.type}`
+				} else {
+					el.className = "notification hidden"
+				}
+			} else if (el) {
+				el.className = "notification hidden"
+			}
+		}, ['notification', 'preferences'])
+
+		// Subscribe to theme changes (re-render theme selector and apply)
+		appStore.subscribe(({ theme }) => {
+			document.body.className = theme
+			const container = document.getElementById("theme-container")
+			if (container) {
+				container.innerHTML = ""
+				container.appendChild(ThemeSelector())
+			}
+		}, ['theme'])
+
+		// Subscribe to currency changes (re-render currency selector)
+		appStore.subscribe(({ currency }) => {
+			const container = document.getElementById("currency-container")
+			if (container) {
+				container.innerHTML = ""
+				container.appendChild(CurrencySelector())
+			}
+		}, ['currency'])
+
+		// Apply initial theme
+		document.body.className = appStore.getState().theme
+	</script>
+</body>
+</html>

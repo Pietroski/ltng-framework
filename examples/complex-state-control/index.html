@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>LTNG Shop - Products</title>
+	<link rel="stylesheet" href="styles.css">
+	<script src="../../ltng-framework.js"></script>
+	<script src="store.js"></script>
+</head>
+<body>
+	<script>
+		// Sample products data
+		const products = [
+			{ id: 1, name: "Wireless Headphones", price: 79.99, category: "electronics", image: "🎧" },
+			{ id: 2, name: "Running Shoes", price: 129.99, category: "sports", image: "👟" },
+			{ id: 3, name: "Coffee Maker", price: 49.99, category: "home", image: "☕" },
+			{ id: 4, name: "Backpack", price: 59.99, category: "accessories", image: "🎒" },
+			{ id: 5, name: "Smart Watch", price: 199.99, category: "electronics", image: "⌚" },
+			{ id: 6, name: "Yoga Mat", price: 29.99, category: "sports", image: "🧘" },
+		]
+
+		// Initialize products in store (only if not already set)
+		if (!appStore.getState().products.length) {
+			appStore.setState({ products })
+		}
+
+		// Helper to format price based on currency
+		const formatPrice = (price) => {
+			const { currency } = appStore.getState()
+			const rates = { USD: 1, EUR: 0.85, GBP: 0.73 }
+			const symbols = { USD: "$", EUR: "€", GBP: "£" }
+			const converted = (price * rates[currency]).toFixed(2)
+			return `${symbols[currency]}${converted}`
+		}
+
+		// Add to cart handler
+		const addToCart = (product) => {
+			const { cart } = appStore.getState()
+			const existing = cart.find(item => item.id === product.id)
+			
+			if (existing) {
+				appStore.setState({
+					cart: cart.map(item => 
+						item.id === product.id 
+							? { ...item, quantity: item.quantity + 1 }
+							: item
+					)
+				})
+			} else {
+				appStore.setState({
+					cart: [...cart, { ...product, quantity: 1 }]
+				})
+			}
+			
+			// Show notification
+			appStore.setState({ 
+				notification: { message: `${product.name} added to cart!`, type: "success" }
+			})
+			setTimeout(() => appStore.setState({ notification: null }), 2000)
+		}
+
+		// Product card component
+		const ProductCard = (product) => {
+			return div({ class: "product-card" },
+				div({ class: "product-image" }, product.image),
+				h3({ class: "product-name" }, product.name),
+				p({ class: "product-category" }, product.category),
+				p({ class: "product-price" }, formatPrice(product.price)),
+				button({ 
+					class: "btn btn-primary",
+					onClick: () => addToCart(product)
+				}, "Add to Cart")
+			)
+		}
+
+		// Navigation component
+		const Navigation = () => {
+			const cartCount = appStore.getState().cart.reduce((sum, item) => sum + item.quantity, 0)
+			
+			return nav({ class: "navbar" },
+				a({ href: "index.html", class: "nav-brand" }, "🛍️ LTNG Shop"),
+				div({ class: "nav-links" },
+					a({ href: "index.html", class: "nav-link active" }, "Products"),
+					a({ href: "cart.html", class: "nav-link" }, 
+						"Cart ",
+						span({ class: "badge", id: "cart-badge" }, cartCount)
+					),
+					a({ href: "settings.html", class: "nav-link" }, "⚙️ Settings")
+				)
+			)
+		}
+
+		// Notification component
+		const Notification = () => {
+			return div({ id: "notification", class: "notification hidden" })
+		}
+
+		// Products grid (reactive)
+		const ProductsGrid = () => {
+			const { products, filter } = appStore.getState()
+			const filtered = filter === "all" 
+				? products 
+				: products.filter(p => p.category === filter)
+			
+			return div({ class: "products-grid" },
+				...filtered.map(ProductCard)
+			)
+		}
+
+		// Filter buttons
+		const FilterBar = () => {
+			const categories = ["all", "electronics", "sports", "home", "accessories"]
+			const { filter } = appStore.getState()
+			
+			return div({ class: "filter-bar" },
+				...categories.map(cat => 
+					button({
+						class: `btn ${filter === cat ? 'btn-active' : 'btn-outline'}`,
+						onClick: () => appStore.setState({ filter: cat })
+					}, cat.charAt(0).toUpperCase() + cat.slice(1))
+				)
+			)
+		}
+
+		// Main app
+		const App = () => {
+			return div({ id: "app" },
+				Navigation(),
+				Notification(),
+				main({ class: "container" },
+					h1({}, "Our Products"),
+					p({ class: "subtitle" }, "Browse our amazing collection"),
+					FilterBar(),
+					div({ id: "products-container" }, ProductsGrid())
+				)
+			)
+		}
+
+		// Render app
+		Body.render(App())
+
+		// Subscribe to cart changes (update badge)
+		appStore.subscribe(({ cart }) => {
+			const badge = document.getElementById("cart-badge")
+			if (badge) {
+				const count = cart.reduce((sum, item) => sum + item.quantity, 0)
+				badge.textContent = count
+			}
+		}, ['cart'])
+
+		// Subscribe to filter changes (re-render products)
+		appStore.subscribe(({ filter, products }) => {
+			const container = document.getElementById("products-container")
+			if (container) {
+				container.innerHTML = ""
+				container.appendChild(ProductsGrid())
+			}
+		}, ['filter', 'products'])
+
+		// Subscribe to notifications
+		appStore.subscribe(({ notification }) => {
+			const el = document.getElementById("notification")
+			if (el) {
+				if (notification) {
+					el.textContent = notification.message
+					el.className = `notification ${notification.type}`
+				} else {
+					el.className = "notification hidden"
+				}
+			}
+		}, ['notification'])
+
+		// Subscribe to theme changes
+		appStore.subscribe(({ theme }) => {
+			document.body.className = theme
+		}, ['theme'])
+
+		// Apply initial theme
+		document.body.className = appStore.getState().theme
+	</script>
+</body>
+</html>
