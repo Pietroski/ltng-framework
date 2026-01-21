@@ -76,20 +76,27 @@ objStrDasher({
 ```javascript
 import { styleToString, toStyles } from './ltng-tools/converter/index.mjs'
 
-// Convert style object to CSS string
+// Convert style object to CSS string (handles camelCase → kebab-case)
 styleToString({ 
     backgroundColor: 'blue', 
     fontSize: '14px' 
 })
 // → 'background-color: blue; font-size: 14px'
 
-// Add vendor prefixes (moz, webkit)
+// Add '-' prefix to vendor keys (moz, webkit) - does NOT convert camelCase
 toStyles({ 
     mozTransform: 'rotate(45deg)',
     webkitTransform: 'rotate(45deg)',
     transform: 'rotate(45deg)'
 })
-// → { '-moz-transform': '...', '-webkit-transform': '...', 'transform': '...' }
+// → { '-mozTransform': 'rotate(45deg)', '-webkitTransform': 'rotate(45deg)', 'transform': 'rotate(45deg)' }
+
+// To get proper CSS: combine toStyles with styleToString
+styleToString(toStyles({ 
+    webkitBackdropFilter: 'blur(10px)',
+    backdropFilter: 'blur(10px)'
+}))
+// → '-webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px)'
 ```
 
 ### API Reference
@@ -100,8 +107,8 @@ toStyles({
 | `kebabToLowerSnakeCase` | `string` | `string` | kebab-case → snake_case |
 | `lowerCamelCaseToLowerCaseLowerSnakeCase` | `string` | `string` | camelCase → snake_case |
 | `objStrDasher` | `object` | `object` | Convert all keys to kebab-case |
-| `styleToString` | `object` | `string` | Style object → CSS string |
-| `toStyles` | `object` | `object` | Add vendor prefixes to moz/webkit keys |
+| `styleToString` | `object` | `string` | Style object → CSS string (converts camelCase) |
+| `toStyles` | `object` | `object` | Add `-` prefix to moz/webkit keys only |
 
 ---
 
