@@ -14,6 +14,16 @@ function handleCSR(req, res, config) {
     //     return
     // }
 
+    // Clean URL support: if URL has no extension, try adding .html
+    // e.g., /search -> /search.html, /profile -> /profile.html
+    const hasExtension = path.extname(url) !== ''
+    if (!hasExtension && url !== '/') {
+        const htmlPath = path.join(srcDir, url + '.html')
+        if (fs.existsSync(htmlPath)) {
+            url = url + '.html'
+        }
+    }
+
     let filePath = path.join(srcDir, url)
     
     // Fallback to rootDir if not found in srcDir (for shared assets like pkg/)
